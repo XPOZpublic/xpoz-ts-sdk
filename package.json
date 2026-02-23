@@ -19,7 +19,8 @@
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0"
@@ -32,5 +33,15 @@
   },
   "engines": {
     "node": ">=18"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/XPOZpublic/xpoz-ts-sdk.git"
+  },
+  "homepage": "https://xpoz.ai",
+  "bugs": {
+    "url": "https://github.com/XPOZpublic/xpoz-ts-sdk/issues"
+  },
+  "license": "MIT",
+  "keywords": ["xpoz", "social-media", "twitter", "instagram", "reddit", "sdk", "mcp", "api"]
 }

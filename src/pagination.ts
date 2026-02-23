@@ -47,17 +47,6 @@ export class PaginatedResult<T> {
     return this._fetchPageResult(pageNumber);
   }
 
-  async getAllPages(): Promise<T[]> {
-    const allData = [...this.data];
-    let current = this.pagination.pageNumber;
-    while (current < this.pagination.totalPages) {
-      current++;
-      const result = await this._fetchPageResult(current);
-      allData.push(...result.data);
-    }
-    return allData;
-  }
-
   async exportCsv(): Promise<string> {
     if (!this._fetchExport || !this._exportOperationId) {
       throw new Error("CSV export not available for this result");

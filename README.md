@@ -31,7 +31,7 @@ The SDK wraps Xpoz's [MCP](https://modelcontextprotocol.io) server, abstracting 
 - **30 data methods** across Twitter, Instagram, and Reddit
 - **Fully async** — all methods return `Promise<T>`
 - **Automatic operation polling** — long-running queries are abstracted away
-- **Server-side pagination** — `PaginatedResult<T>` with `nextPage()`, `getPage(n)`, `getAllPages()`
+- **Server-side pagination** — `PaginatedResult<T>` with `nextPage()`, `getPage(n)`
 - **CSV export** — `exportCsv()` on any paginated result
 - **Field selection** — request only the fields you need
 - **TypeScript-first** — fully typed results with autocomplete support
@@ -113,9 +113,6 @@ results.hasNextPage()               // boolean
 // Navigate pages
 const page2 = await results.nextPage();     // fetch next page
 const page5 = await results.getPage(5);     // jump to specific page
-
-// Fetch everything
-const allPosts = await results.getAllPages();  // TwitterPost[] across all pages
 
 // Export to CSV
 const csvUrl = await results.exportCsv();   // returns download URL

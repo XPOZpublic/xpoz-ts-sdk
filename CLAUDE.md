@@ -93,7 +93,7 @@ Many xpoz-mcp tools return an `operationId` instead of immediate results (long-r
 ### Pagination (`pagination.ts`)
 
 - `PaginatedResult<T>` wraps first-page data + `PaginationInfo` + a stored `fetchPage` callback
-- `nextPage()`, `getPage(n)`, `getAllPages()` fetch subsequent pages using `tableName` from the first response
+- `nextPage()`, `getPage(n)` fetch subsequent pages using `tableName` from the first response
 - `exportCsv()` polls the export operation and returns a download URL
 
 ### Namespace Pattern
