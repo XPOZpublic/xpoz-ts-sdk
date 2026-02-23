@@ -51,8 +51,8 @@ console.log(`${user.name} — ${user.followersCount?.toLocaleString()} followers
 const results = await client.twitter.searchPosts("artificial intelligence", {
   startDate: "2025-01-01",
 });
-for (const tweet of results.data) {
-  console.log(tweet.text, tweet.likeCount);
+for (const post of results.data) {
+  console.log(post.text, post.likeCount);
 }
 
 await client.close();
@@ -102,7 +102,7 @@ Methods that return large datasets use server-side pagination (100 items per pag
 ```typescript
 const results = await client.twitter.searchPosts("AI");
 
-results.data                        // Tweet[] — current page
+results.data                        // TwitterPost[] — current page
 results.pagination.totalRows        // total matching rows
 results.pagination.totalPages       // total pages
 results.pagination.pageNumber       // current page number
@@ -115,7 +115,7 @@ const page2 = await results.nextPage();     // fetch next page
 const page5 = await results.getPage(5);     // jump to specific page
 
 // Fetch everything
-const allTweets = await results.getAllPages();  // Tweet[] across all pages
+const allPosts = await results.getAllPages();  // TwitterPost[] across all pages
 
 // Export to CSV
 const csvUrl = await results.exportCsv();   // returns download URL
@@ -137,6 +137,50 @@ const user = await client.twitter.getUser("elonmusk", {
 ```
 
 Requesting fewer fields significantly improves response time.
+
+## Query Syntax
+
+The `query` parameter on all `search*` and `get*ByKeywords` methods supports a Lucene-style full-text syntax across Twitter, Instagram, and Reddit.
+
+### Exact phrase
+Wrap in double quotes to require an exact match:
+```
+"machine learning"
+"climate change"
+```
+
+### Keywords (any word)
+Space-separated terms without quotes match posts containing **any** of the words:
+```
+AI crypto blockchain
+```
+
+### Boolean operators
+Use `AND`, `OR`, `NOT` (case-insensitive). A bare space is treated as `OR` — be explicit:
+```
+"deep learning" AND python
+tensorflow OR pytorch
+climate NOT politics
+```
+
+### Grouping with parentheses
+```
+(AI OR "artificial intelligence") AND ethics
+(startup OR entrepreneur) NOT "venture capital"
+```
+
+### Combined example
+```typescript
+const results = await client.twitter.searchPosts(
+  '("machine learning" OR "deep learning") AND python NOT spam',
+  {
+    startDate: "2025-01-01",
+    language: "en",
+  }
+);
+```
+
+> **Note:** Do not use `from:`, `lang:`, `since:`, or `until:` in the query string — use the dedicated parameters (`authorUsername`, `language`, `startDate`, `endDate`) instead.
 
 ## Error Handling
 
@@ -210,7 +254,7 @@ const users = await client.twitter.getUsersByKeywords('"machine learning"', {
 });
 ```
 
-#### `getPostsByIds(postIds, options?) -> Promise<Tweet[]>`
+#### `getPostsByIds(postIds, options?) -> Promise<TwitterPost[]>`
 
 Get 1-100 posts by their IDs.
 
@@ -218,7 +262,7 @@ Get 1-100 posts by their IDs.
 const tweets = await client.twitter.getPostsByIds(["1234567890", "0987654321"]);
 ```
 
-#### `getPostsByAuthor(identifier, options?) -> Promise<PaginatedResult<Tweet>>`
+#### `getPostsByAuthor(identifier, options?) -> Promise<PaginatedResult<TwitterPost>>`
 
 Get all posts by an author with optional date filtering.
 
@@ -228,7 +272,7 @@ const results = await client.twitter.getPostsByAuthor("elonmusk", {
 });
 ```
 
-#### `searchPosts(query, options?) -> Promise<PaginatedResult<Tweet>>`
+#### `searchPosts(query, options?) -> Promise<PaginatedResult<TwitterPost>>`
 
 Full-text search with filters. Supports exact phrases (`"machine learning"`), boolean operators (`AI AND python`), and parentheses.
 
@@ -241,7 +285,7 @@ const results = await client.twitter.searchPosts('"artificial intelligence" AND 
 });
 ```
 
-#### `getRetweets(postId, options?) -> Promise<PaginatedResult<Tweet>>`
+#### `getRetweets(postId, options?) -> Promise<PaginatedResult<TwitterPost>>`
 
 Get retweets of a specific post (database only).
 
@@ -249,7 +293,7 @@ Get retweets of a specific post (database only).
 const retweets = await client.twitter.getRetweets("1234567890");
 ```
 
-#### `getQuotes(postId, options?) -> Promise<PaginatedResult<Tweet>>`
+#### `getQuotes(postId, options?) -> Promise<PaginatedResult<TwitterPost>>`
 
 Get quote tweets of a specific post.
 
@@ -257,7 +301,7 @@ Get quote tweets of a specific post.
 const quotes = await client.twitter.getQuotes("1234567890");
 ```
 
-#### `getComments(postId, options?) -> Promise<PaginatedResult<Tweet>>`
+#### `getComments(postId, options?) -> Promise<PaginatedResult<TwitterPost>>`
 
 Get replies to a specific post.
 
@@ -433,12 +477,12 @@ const subs = await client.reddit.getSubredditsByKeywords("cryptocurrency");
 
 All fields are optional and typed as their respective TypeScript types. Unknown fields are preserved on the object.
 
-### Tweet
+### TwitterPost
 
 | Field               | Type       | Description                |
 | ------------------- | ---------- | -------------------------- |
-| `id`                | `string`   | Tweet ID                   |
-| `text`              | `string`   | Tweet text content         |
+| `id`                | `string`   | Post ID                    |
+| `text`              | `string`   | Post text content          |
 | `authorId`          | `string`   | Author's user ID           |
 | `authorUsername`    | `string`   | Author's username          |
 | `likeCount`         | `number`   | Number of likes            |

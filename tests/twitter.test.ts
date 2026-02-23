@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { createTestClient } from "./setup.js";
 import { XpozClient, PaginatedResult } from "../src/index.js";
-import type { Tweet, TwitterUser } from "../src/index.js";
+import type { TwitterPost, TwitterUser } from "../src/index.js";
 
 const TWITTER_POST_ID = "1874266108200673750";
 
@@ -76,9 +76,9 @@ describe("TwitterUsers", () => {
 });
 
 describe("TwitterPosts", () => {
-  let searchResult: PaginatedResult<Tweet>;
-  let pagingResult: PaginatedResult<Tweet>;
-  let csvResult: PaginatedResult<Tweet>;
+  let searchResult: PaginatedResult<TwitterPost>;
+  let pagingResult: PaginatedResult<TwitterPost>;
+  let csvResult: PaginatedResult<TwitterPost>;
 
   beforeAll(async () => {
     if (!hasClient()) return;
@@ -105,7 +105,7 @@ describe("TwitterPosts", () => {
     expect(result).toBeInstanceOf(PaginatedResult);
     expect(result.data.length).toBeGreaterThan(0);
     for (const post of result.data) {
-      expect((post as Tweet).text).toBeTruthy();
+      expect((post as TwitterPost).text).toBeTruthy();
     }
   });
 
@@ -156,7 +156,7 @@ describe("TwitterPosts", () => {
     const posts = await client.twitter.getPostsByIds([TWITTER_POST_ID]);
     expect(Array.isArray(posts)).toBe(true);
     expect(posts.length).toBe(1);
-    expect((posts[0] as Tweet).id).toBeTruthy();
+    expect((posts[0] as TwitterPost).id).toBeTruthy();
   });
 
   it("count_posts", async () => {

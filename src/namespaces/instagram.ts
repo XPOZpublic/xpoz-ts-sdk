@@ -1,7 +1,7 @@
 import { BaseNamespace } from "./base.js";
 import { PaginatedResult } from "../pagination.js";
 import type { InstagramPost, InstagramUser, InstagramComment } from "../types/instagram.js";
-import * as tools from "../tools.js";
+import * as tools from "../config/tools.js";
 
 type RawDict = Record<string, unknown>;
 

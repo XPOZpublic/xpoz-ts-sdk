@@ -1,9 +1,9 @@
-import { DEFAULT_TIMEOUT_MS, POLL_INTERVAL_MS } from "./constants.js";
+import { DEFAULT_TIMEOUT_MS, POLL_INTERVAL_MS } from "../config/constants.js";
 import {
   OperationFailedError,
   OperationCancelledError,
   OperationTimeoutError,
-} from "./errors.js";
+} from "../errors.js";
 
 type CallTool = (name: string, args: Record<string, unknown>) => Promise<Record<string, unknown>>;
 

@@ -1,4 +1,4 @@
-export interface Tweet {
+export interface TwitterPost {
   id?: string | null;
   text?: string | null;
   authorId?: string | null;

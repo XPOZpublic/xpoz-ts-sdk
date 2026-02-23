@@ -1,6 +1,6 @@
-import { McpTransport } from "./transport.js";
+import { McpTransport } from "./mcp/transport.js";
 import { AuthenticationError } from "./errors.js";
-import { DEFAULT_SERVER_URL, DEFAULT_TIMEOUT_MS, ENV_API_KEY, ENV_SERVER_URL } from "./constants.js";
+import { DEFAULT_SERVER_URL, DEFAULT_TIMEOUT_MS, ENV_API_KEY, ENV_SERVER_URL } from "./config/constants.js";
 import { TwitterNamespace } from "./namespaces/twitter.js";
 import { InstagramNamespace } from "./namespaces/instagram.js";
 import { RedditNamespace } from "./namespaces/reddit.js";

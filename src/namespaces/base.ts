@@ -1,7 +1,7 @@
-import { waitForResult } from "../polling.js";
+import { waitForResult } from "../mcp/polling.js";
 import { PaginatedResult } from "../pagination.js";
 import type { PaginationInfo } from "../types/common.js";
-import { DEFAULT_TIMEOUT_MS } from "../constants.js";
+import { DEFAULT_TIMEOUT_MS } from "../config/constants.js";
 
 type CallTool = (name: string, args: Record<string, unknown>) => Promise<Record<string, unknown>>;
 type RawDict = Record<string, unknown>;

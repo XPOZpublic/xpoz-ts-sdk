@@ -10,7 +10,7 @@ export {
 } from "./errors.js";
 export { VERSION } from "./version.js";
 export type { PaginationInfo } from "./types/common.js";
-export type { Tweet, TwitterUser } from "./types/twitter.js";
+export type { TwitterPost, TwitterUser } from "./types/twitter.js";
 export type { InstagramPost, InstagramUser, InstagramComment } from "./types/instagram.js";
 export type {
   RedditPost,

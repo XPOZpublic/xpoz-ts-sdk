@@ -1,7 +1,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { parseResponseText } from "./responseParser.js";
-import { VERSION } from "./version.js";
+import { parseResponseText } from "../transform/responseParser.js";
+import { VERSION } from "../version.js";
 
 const USER_AGENT = `xpoz-ts-sdk/${VERSION}`;
 

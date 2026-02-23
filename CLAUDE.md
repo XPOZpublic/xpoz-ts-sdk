@@ -18,17 +18,24 @@ xpoz-ts/
     ├── index.ts            # Public exports
     ├── version.ts          # VERSION string
     ├── client.ts           # XpozClient
-    ├── transport.ts        # MCP Streamable HTTP transport wrapper
-    ├── polling.ts          # Operation polling (5s interval, configurable timeout)
     ├── pagination.ts       # PaginatedResult<T>
-    ├── responseParser.ts   # Response parsing helpers
     ├── errors.ts           # Error hierarchy
-    ├── tools.ts            # MCP tool name constants
-    ├── constants.ts        # DEFAULT_SERVER_URL, ENV vars, timeouts
+    ├── version.ts          # VERSION string
+    ├── mcp/                # MCP protocol layer
+    │   ├── index.ts
+    │   ├── transport.ts    # MCP Streamable HTTP transport wrapper
+    │   └── polling.ts      # Operation polling (5s interval, configurable timeout)
+    ├── transform/          # Response data processing
+    │   ├── index.ts
+    │   └── responseParser.ts # Response parsing helpers
+    ├── config/             # Configuration values
+    │   ├── index.ts
+    │   ├── constants.ts    # DEFAULT_SERVER_URL, ENV vars, timeouts
+    │   └── tools.ts        # MCP tool name constants
     ├── types/              # TypeScript interfaces
     │   ├── index.ts
     │   ├── common.ts       # PaginationInfo
-    │   ├── twitter.ts      # Tweet, TwitterUser
+    │   ├── twitter.ts      # TwitterPost, TwitterUser
     │   ├── instagram.ts    # InstagramPost, InstagramUser, InstagramComment
     │   └── reddit.ts       # RedditPost, RedditUser, RedditComment, RedditSubreddit, composites
     └── namespaces/         # Platform method groups

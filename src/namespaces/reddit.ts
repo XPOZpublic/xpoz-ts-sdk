@@ -8,7 +8,7 @@ import type {
   RedditPostWithComments,
   SubredditWithPosts,
 } from "../types/reddit.js";
-import * as tools from "../tools.js";
+import * as tools from "../config/tools.js";
 
 type RawDict = Record<string, unknown>;
 
