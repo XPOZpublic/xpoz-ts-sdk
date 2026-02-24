@@ -1,11 +1,13 @@
 # Xpoz TypeScript SDK
 
+[![npm version](https://img.shields.io/npm/v/@xpoz/xpoz)](https://www.npmjs.com/package/@xpoz/xpoz)
+
 TypeScript SDK for the [Xpoz](https://xpoz.ai) social media intelligence platform. Query Twitter/X, Instagram, and Reddit data through a simple, typed interface.
 
 ## Installation
 
 ```bash
-npm install xpoz
+npm install @xpoz/xpoz
 ```
 
 Requires Node.js 18+.
@@ -40,7 +42,7 @@ The SDK wraps Xpoz's [MCP](https://modelcontextprotocol.io) server, abstracting 
 ## Quick Start
 
 ```typescript
-import { XpozClient } from "xpoz";
+import { XpozClient } from "@xpoz/xpoz";
 
 const client = new XpozClient({ apiKey: "your-api-key" });
 await client.connect();
@@ -189,7 +191,7 @@ import {
   OperationTimeoutError,
   OperationFailedError,
   OperationCancelledError,
-} from "xpoz";
+} from "@xpoz/xpoz";
 
 try {
   const user = await client.twitter.getUser("nonexistent_user_12345");
