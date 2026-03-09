@@ -35,6 +35,8 @@ export class InstagramNamespace extends BaseNamespace {
       startDate?: string;
       endDate?: string;
       forceLatest?: boolean;
+      responseType?: string;
+      limit?: number;
     } = {}
   ): Promise<PaginatedResult<InstagramPost>> {
     const args = this.buildArgs({
@@ -44,6 +46,8 @@ export class InstagramNamespace extends BaseNamespace {
       startDate: options.startDate,
       endDate: options.endDate,
       forceLatest: options.forceLatest,
+      responseType: options.responseType,
+      limit: options.limit,
     });
     const result = await this.callAndMaybePoll(tools.GET_INSTAGRAM_POSTS_BY_USER, args);
     return this.buildPaginatedResult(
@@ -61,9 +65,19 @@ export class InstagramNamespace extends BaseNamespace {
       startDate?: string;
       endDate?: string;
       forceLatest?: boolean;
+      responseType?: string;
+      limit?: number;
     } = {}
   ): Promise<PaginatedResult<InstagramPost>> {
-    const args = this.buildArgs({ query, ...options });
+    const args = this.buildArgs({
+      query,
+      fields: options.fields,
+      startDate: options.startDate,
+      endDate: options.endDate,
+      forceLatest: options.forceLatest,
+      responseType: options.responseType,
+      limit: options.limit,
+    });
     const result = await this.callAndMaybePoll(tools.SEARCH_INSTAGRAM_POSTS, args);
     return this.buildPaginatedResult(result, parsePost, tools.SEARCH_INSTAGRAM_POSTS, args);
   }

@@ -26,20 +26,22 @@ export class TwitterNamespace extends BaseNamespace {
   async getPostsByAuthor(
     identifier: string,
     options: {
-      identifierType?: string;
       fields?: string[];
       startDate?: string;
       endDate?: string;
       forceLatest?: boolean;
+      responseType?: string;
+      limit?: number;
     } = {}
   ): Promise<PaginatedResult<TwitterPost>> {
     const args = this.buildArgs({
-      identifier,
-      identifierType: options.identifierType ?? "username",
+      username: identifier,
       fields: options.fields,
       startDate: options.startDate,
       endDate: options.endDate,
       forceLatest: options.forceLatest,
+      responseType: options.responseType,
+      limit: options.limit,
     });
     const result = await this.callAndMaybePoll(tools.GET_TWITTER_POSTS_BY_AUTHOR, args);
     return this.buildPaginatedResult(result, parseTwitterPost, tools.GET_TWITTER_POSTS_BY_AUTHOR, args);
@@ -56,6 +58,7 @@ export class TwitterNamespace extends BaseNamespace {
       language?: string;
       forceLatest?: boolean;
       responseType?: string;
+      limit?: number;
     } = {}
   ): Promise<PaginatedResult<TwitterPost>> {
     const args = this.buildArgs({
@@ -68,6 +71,7 @@ export class TwitterNamespace extends BaseNamespace {
       language: options.language,
       forceLatest: options.forceLatest,
       responseType: options.responseType,
+      limit: options.limit,
     });
 
     if (options.responseType === "csv") {

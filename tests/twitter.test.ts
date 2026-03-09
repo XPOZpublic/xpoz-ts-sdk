@@ -85,6 +85,8 @@ describe("TwitterPosts", () => {
     searchResult = await client.twitter.searchPosts("bitcoin", {
       startDate: "2025-01-01",
       fields: ["id", "text", "likeCount", "retweetCount"],
+      responseType: "fast",
+      limit: 10,
     });
     pagingResult = await client.twitter.searchPosts("bitcoin", {
       startDate: "2025-01-01",
@@ -97,10 +99,12 @@ describe("TwitterPosts", () => {
     });
   });
 
-  it("get_posts_by_author", async () => {
+  it("get_posts_by_author (fast mode)", async () => {
     if (!hasClient()) return;
     const result = await client.twitter.getPostsByAuthor("elonmusk", {
       fields: ["id", "text", "likeCount"],
+      responseType: "fast",
+      limit: 10,
     });
     expect(result).toBeInstanceOf(PaginatedResult);
     expect(result.data.length).toBeGreaterThan(0);
@@ -109,11 +113,30 @@ describe("TwitterPosts", () => {
     }
   });
 
-  it("search_posts returns PaginatedResult", () => {
+  it("get_posts_by_author (paging mode)", async () => {
+    if (!hasClient()) return;
+    const result = await client.twitter.getPostsByAuthor("elonmusk", {
+      fields: ["id", "text", "likeCount"],
+      responseType: "paging",
+    });
+    expect(result).toBeInstanceOf(PaginatedResult);
+    expect(result.data.length).toBeGreaterThan(0);
+    expect(result.pagination.totalRows).toBeGreaterThan(0);
+    expect(result.pagination.tableName).toBeTruthy();
+  });
+
+  it("search_posts (fast mode)", () => {
     if (!hasClient()) return;
     expect(searchResult).toBeInstanceOf(PaginatedResult);
-    expect(searchResult.pagination.pageNumber).toBe(1);
-    expect(typeof searchResult.pagination.totalPages).toBe("number");
+    expect(searchResult.data.length).toBeGreaterThan(0);
+  });
+
+  it("search_posts (paging mode)", () => {
+    if (!hasClient()) return;
+    expect(pagingResult).toBeInstanceOf(PaginatedResult);
+    expect(pagingResult.data.length).toBeGreaterThan(0);
+    expect(pagingResult.pagination.totalRows).toBeGreaterThan(0);
+    expect(pagingResult.pagination.tableName).toBeTruthy();
   });
 
   it("search_posts pagination", async () => {

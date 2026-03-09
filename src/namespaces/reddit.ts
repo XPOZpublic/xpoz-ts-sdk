@@ -39,6 +39,8 @@ export class RedditNamespace extends BaseNamespace {
       time?: string;
       subreddit?: string;
       forceLatest?: boolean;
+      responseType?: string;
+      limit?: number;
     } = {}
   ): Promise<PaginatedResult<RedditPost>> {
     const args = this.buildArgs({ query, ...options });

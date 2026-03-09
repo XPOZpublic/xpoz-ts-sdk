@@ -3,7 +3,10 @@ import { PaginatedResult } from "../pagination.js";
 import type { PaginationInfo } from "../types/common.js";
 import { DEFAULT_TIMEOUT_MS } from "../config/constants.js";
 
-type CallTool = (name: string, args: Record<string, unknown>) => Promise<Record<string, unknown>>;
+type CallTool = (
+  name: string,
+  args: Record<string, unknown>
+) => Promise<Record<string, unknown>>;
 type RawDict = Record<string, unknown>;
 
 function extractPagination(raw: RawDict): PaginationInfo {
@@ -35,12 +38,21 @@ export class BaseNamespace {
     this.timeoutMs = timeoutMs;
   }
 
-  protected async callAndMaybePoll(toolName: string, args: RawDict): Promise<RawDict> {
+  protected async callAndMaybePoll(
+    toolName: string,
+    args: RawDict
+  ): Promise<RawDict> {
     const result = await this.callTool(toolName, args);
+
+    if ("results" in result) {
+      return result;
+    }
+
     const operationId = result["operationId"] as string | undefined;
     if (operationId) {
       return waitForResult(this.callTool, operationId, this.timeoutMs);
     }
+
     return result;
   }
 
@@ -55,7 +67,10 @@ export class BaseNamespace {
     const tableName = pagination.tableName;
     const exportOpId = extractExportOpId(raw);
 
-    const fetchPage = async (pageNumber: number, tbl: string | null | undefined): Promise<PaginatedResult<T>> => {
+    const fetchPage = async (
+      pageNumber: number,
+      tbl: string | null | undefined
+    ): Promise<PaginatedResult<T>> => {
       const args: RawDict = { ...baseArgs, pageNumber };
       if (tbl) args["tableName"] = tbl;
       const pageRaw = await this.callAndMaybePoll(toolName, args);
@@ -63,7 +78,11 @@ export class BaseNamespace {
     };
 
     const fetchExport = async (opId: string): Promise<string> => {
-      const pollResult = await waitForResult(this.callTool, opId, this.timeoutMs);
+      const pollResult = await waitForResult(
+        this.callTool,
+        opId,
+        this.timeoutMs
+      );
       return (pollResult["downloadUrl"] as string) ?? "";
     };
 

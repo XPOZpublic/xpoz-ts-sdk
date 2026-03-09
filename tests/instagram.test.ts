@@ -19,6 +19,7 @@ afterAll(async () => {
 });
 
 function hasClient(): boolean {
+  console.log(!!process.env["XPOZ_API_KEY"]);
   return !!process.env["XPOZ_API_KEY"];
 }
 
@@ -51,7 +52,10 @@ describe("InstagramUsers", () => {
 
   it("get_user_connections", async () => {
     if (!hasClient()) return;
-    const result = await client.instagram.getUserConnections("instagram", "followers");
+    const result = await client.instagram.getUserConnections(
+      "instagram",
+      "followers"
+    );
     expect(result).toBeInstanceOf(PaginatedResult);
     expect(result.data.length).toBeGreaterThan(0);
   });
@@ -65,28 +69,59 @@ describe("InstagramUsers", () => {
 });
 
 describe("InstagramPosts", () => {
-  let postsResult: PaginatedResult<InstagramPost>;
+  let postsFastResult: PaginatedResult<InstagramPost>;
+  let postsPagingResult: PaginatedResult<InstagramPost>;
+  let searchFastResult: PaginatedResult<InstagramPost>;
+  let searchPagingResult: PaginatedResult<InstagramPost>;
 
   beforeAll(async () => {
     if (!hasClient()) return;
-    postsResult = await client.instagram.getPostsByUser("instagram", {
+    postsFastResult = await client.instagram.getPostsByUser("instagram", {
       fields: ["id", "caption", "likeCount"],
+      responseType: "fast",
+      limit: 10,
+    });
+    postsPagingResult = await client.instagram.getPostsByUser("instagram", {
+      fields: ["id", "caption", "likeCount"],
+      responseType: "paging",
+    });
+    searchFastResult = await client.instagram.searchPosts("travel", {
+      fields: ["id", "caption", "likeCount"],
+      responseType: "fast",
+      limit: 10,
+    });
+    searchPagingResult = await client.instagram.searchPosts("travel", {
+      fields: ["id", "caption", "likeCount"],
+      responseType: "paging",
     });
   });
 
-  it("get_posts_by_user", () => {
+  it("get_posts_by_user (fast mode)", () => {
     if (!hasClient()) return;
-    expect(postsResult).toBeInstanceOf(PaginatedResult);
-    expect(postsResult.data.length).toBeGreaterThan(0);
+    expect(postsFastResult).toBeInstanceOf(PaginatedResult);
+    expect(postsFastResult.data.length).toBeGreaterThan(0);
   });
 
-  it("search_posts", async () => {
+  it("get_posts_by_user (paging mode)", () => {
     if (!hasClient()) return;
-    const result = await client.instagram.searchPosts("travel", {
-      fields: ["id", "caption", "likeCount"],
-    });
-    expect(result).toBeInstanceOf(PaginatedResult);
-    expect(result.pagination.totalRows).toBeGreaterThan(0);
+    expect(postsPagingResult).toBeInstanceOf(PaginatedResult);
+    expect(postsPagingResult.data.length).toBeGreaterThan(0);
+    expect(postsPagingResult.pagination.totalRows).toBeGreaterThan(0);
+    expect(postsPagingResult.pagination.tableName).toBeTruthy();
+  });
+
+  it("search_posts (fast mode)", () => {
+    if (!hasClient()) return;
+    expect(searchFastResult).toBeInstanceOf(PaginatedResult);
+    expect(searchFastResult.data.length).toBeGreaterThan(0);
+  });
+
+  it("search_posts (paging mode)", () => {
+    if (!hasClient()) return;
+    expect(searchPagingResult).toBeInstanceOf(PaginatedResult);
+    expect(searchPagingResult.data.length).toBeGreaterThan(0);
+    expect(searchPagingResult.pagination.totalRows).toBeGreaterThan(0);
+    expect(searchPagingResult.pagination.tableName).toBeTruthy();
   });
 
   it("get_posts_by_ids", async () => {
