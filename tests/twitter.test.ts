@@ -23,6 +23,20 @@ function hasClient(): boolean {
 }
 
 describe("TwitterUsers", () => {
+  let usersByKeywordsFast: PaginatedResult<TwitterUser>;
+  let usersByKeywordsPaging: PaginatedResult<TwitterUser>;
+
+  beforeAll(async () => {
+    if (!hasClient()) return;
+    usersByKeywordsFast = await client.twitter.getUsersByKeywords("artificial intelligence", {
+      responseType: "fast",
+      limit: 10,
+    });
+    usersByKeywordsPaging = await client.twitter.getUsersByKeywords("artificial intelligence", {
+      responseType: "paging",
+    });
+  });
+
   it("get_user by username", async () => {
     if (!hasClient()) return;
     const user = await client.twitter.getUser("elonmusk");
@@ -67,11 +81,18 @@ describe("TwitterUsers", () => {
     expect(result.data.length).toBeGreaterThan(0);
   });
 
-  it("get_users_by_keywords", async () => {
+  it("get_users_by_keywords (fast mode)", () => {
     if (!hasClient()) return;
-    const result = await client.twitter.getUsersByKeywords("artificial intelligence");
-    expect(result).toBeInstanceOf(PaginatedResult);
-    expect(result.data.length).toBeGreaterThan(0);
+    expect(usersByKeywordsFast).toBeInstanceOf(PaginatedResult);
+    expect(usersByKeywordsFast.data.length).toBeGreaterThan(0);
+  });
+
+  it("get_users_by_keywords (paging mode)", () => {
+    if (!hasClient()) return;
+    expect(usersByKeywordsPaging).toBeInstanceOf(PaginatedResult);
+    expect(usersByKeywordsPaging.data.length).toBeGreaterThan(0);
+    expect(usersByKeywordsPaging.pagination.totalRows).toBeGreaterThan(0);
+    expect(usersByKeywordsPaging.pagination.tableName).toBeTruthy();
   });
 });
 

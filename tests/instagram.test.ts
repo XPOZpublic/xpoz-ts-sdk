@@ -24,6 +24,20 @@ function hasClient(): boolean {
 }
 
 describe("InstagramUsers", () => {
+  let usersByKeywordsFast: PaginatedResult<InstagramUser>;
+  let usersByKeywordsPaging: PaginatedResult<InstagramUser>;
+
+  beforeAll(async () => {
+    if (!hasClient()) return;
+    usersByKeywordsFast = await client.instagram.getUsersByKeywords("fashion", {
+      responseType: "fast",
+      limit: 10,
+    });
+    usersByKeywordsPaging = await client.instagram.getUsersByKeywords("fashion", {
+      responseType: "paging",
+    });
+  });
+
   it("get_user", async () => {
     if (!hasClient()) return;
     const user = await client.instagram.getUser("instagram");
@@ -60,11 +74,18 @@ describe("InstagramUsers", () => {
     expect(result.data.length).toBeGreaterThan(0);
   });
 
-  it("get_users_by_keywords", async () => {
+  it("get_users_by_keywords (fast mode)", () => {
     if (!hasClient()) return;
-    const result = await client.instagram.getUsersByKeywords("fashion");
-    expect(result).toBeInstanceOf(PaginatedResult);
-    expect(result.data.length).toBeGreaterThan(0);
+    expect(usersByKeywordsFast).toBeInstanceOf(PaginatedResult);
+    expect(usersByKeywordsFast.data.length).toBeGreaterThan(0);
+  });
+
+  it("get_users_by_keywords (paging mode)", () => {
+    if (!hasClient()) return;
+    expect(usersByKeywordsPaging).toBeInstanceOf(PaginatedResult);
+    expect(usersByKeywordsPaging.data.length).toBeGreaterThan(0);
+    expect(usersByKeywordsPaging.pagination.totalRows).toBeGreaterThan(0);
+    expect(usersByKeywordsPaging.pagination.tableName).toBeTruthy();
   });
 });
 

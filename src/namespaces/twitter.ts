@@ -195,6 +195,8 @@ export class TwitterNamespace extends BaseNamespace {
       endDate?: string;
       language?: string;
       forceLatest?: boolean;
+      responseType?: string;
+      limit?: number;
     } = {}
   ): Promise<PaginatedResult<TwitterUser>> {
     const args = this.buildArgs({ query, ...options });

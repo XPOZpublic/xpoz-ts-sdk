@@ -162,6 +162,8 @@ export class InstagramNamespace extends BaseNamespace {
       startDate?: string;
       endDate?: string;
       forceLatest?: boolean;
+      responseType?: string;
+      limit?: number;
     } = {}
   ): Promise<PaginatedResult<InstagramUser>> {
     const args = this.buildArgs({ query, ...options });
