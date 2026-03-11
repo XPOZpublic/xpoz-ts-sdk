@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { createTestClient } from "./setup.js";
-import { XpozClient, PaginatedResult } from "../src/index.js";
+import { XpozClient, PaginatedResult, ResponseType } from "../src/index.js";
 import type { TwitterPost, TwitterUser } from "../src/index.js";
 
 const TWITTER_POST_ID = "1874266108200673750";
@@ -23,6 +23,20 @@ function hasClient(): boolean {
 }
 
 describe("TwitterUsers", () => {
+  let usersByKeywordsFast: PaginatedResult<TwitterUser>;
+  let usersByKeywordsPaging: PaginatedResult<TwitterUser>;
+
+  beforeAll(async () => {
+    if (!hasClient()) return;
+    usersByKeywordsFast = await client.twitter.getUsersByKeywords("artificial intelligence", {
+      responseType: ResponseType.Fast,
+      limit: 10,
+    });
+    usersByKeywordsPaging = await client.twitter.getUsersByKeywords("artificial intelligence", {
+      responseType: ResponseType.Paging,
+    });
+  });
+
   it("get_user by username", async () => {
     if (!hasClient()) return;
     const user = await client.twitter.getUser("elonmusk");
@@ -67,11 +81,18 @@ describe("TwitterUsers", () => {
     expect(result.data.length).toBeGreaterThan(0);
   });
 
-  it("get_users_by_keywords", async () => {
+  it("get_users_by_keywords (fast mode)", () => {
     if (!hasClient()) return;
-    const result = await client.twitter.getUsersByKeywords("artificial intelligence");
-    expect(result).toBeInstanceOf(PaginatedResult);
-    expect(result.data.length).toBeGreaterThan(0);
+    expect(usersByKeywordsFast).toBeInstanceOf(PaginatedResult);
+    expect(usersByKeywordsFast.data.length).toBeGreaterThan(0);
+  });
+
+  it("get_users_by_keywords (paging mode)", () => {
+    if (!hasClient()) return;
+    expect(usersByKeywordsPaging).toBeInstanceOf(PaginatedResult);
+    expect(usersByKeywordsPaging.data.length).toBeGreaterThan(0);
+    expect(usersByKeywordsPaging.pagination.totalRows).toBeGreaterThan(0);
+    expect(usersByKeywordsPaging.pagination.tableName).toBeTruthy();
   });
 });
 
@@ -85,22 +106,26 @@ describe("TwitterPosts", () => {
     searchResult = await client.twitter.searchPosts("bitcoin", {
       startDate: "2025-01-01",
       fields: ["id", "text", "likeCount", "retweetCount"],
+      responseType: ResponseType.Fast,
+      limit: 10,
     });
     pagingResult = await client.twitter.searchPosts("bitcoin", {
       startDate: "2025-01-01",
       fields: ["id", "text", "likeCount", "retweetCount"],
-      responseType: "paging",
+      responseType: ResponseType.Paging,
     });
     csvResult = await client.twitter.searchPosts("bitcoin", {
       startDate: "2025-01-01",
-      responseType: "csv",
+      responseType: ResponseType.Csv,
     });
   });
 
-  it("get_posts_by_author", async () => {
+  it("get_posts_by_author (fast mode)", async () => {
     if (!hasClient()) return;
     const result = await client.twitter.getPostsByAuthor("elonmusk", {
       fields: ["id", "text", "likeCount"],
+      responseType: ResponseType.Fast,
+      limit: 10,
     });
     expect(result).toBeInstanceOf(PaginatedResult);
     expect(result.data.length).toBeGreaterThan(0);
@@ -109,11 +134,30 @@ describe("TwitterPosts", () => {
     }
   });
 
-  it("search_posts returns PaginatedResult", () => {
+  it("get_posts_by_author (paging mode)", async () => {
+    if (!hasClient()) return;
+    const result = await client.twitter.getPostsByAuthor("elonmusk", {
+      fields: ["id", "text", "likeCount"],
+      responseType: ResponseType.Paging,
+    });
+    expect(result).toBeInstanceOf(PaginatedResult);
+    expect(result.data.length).toBeGreaterThan(0);
+    expect(result.pagination.totalRows).toBeGreaterThan(0);
+    expect(result.pagination.tableName).toBeTruthy();
+  });
+
+  it("search_posts (fast mode)", () => {
     if (!hasClient()) return;
     expect(searchResult).toBeInstanceOf(PaginatedResult);
-    expect(searchResult.pagination.pageNumber).toBe(1);
-    expect(typeof searchResult.pagination.totalPages).toBe("number");
+    expect(searchResult.data.length).toBeGreaterThan(0);
+  });
+
+  it("search_posts (paging mode)", () => {
+    if (!hasClient()) return;
+    expect(pagingResult).toBeInstanceOf(PaginatedResult);
+    expect(pagingResult.data.length).toBeGreaterThan(0);
+    expect(pagingResult.pagination.totalRows).toBeGreaterThan(0);
+    expect(pagingResult.pagination.tableName).toBeTruthy();
   });
 
   it("search_posts pagination", async () => {

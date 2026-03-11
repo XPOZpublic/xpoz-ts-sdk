@@ -9,6 +9,7 @@ export {
   OperationCancelledError,
 } from "./errors.js";
 export { VERSION } from "./version.js";
+export { ResponseType } from "./config/constants.js";
 export type { PaginationInfo } from "./types/common.js";
 export type { TwitterPost, TwitterUser } from "./types/twitter.js";
 export type { InstagramPost, InstagramUser, InstagramComment } from "./types/instagram.js";

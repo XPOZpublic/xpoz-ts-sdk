@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { createTestClient } from "./setup.js";
-import { XpozClient, PaginatedResult } from "../src/index.js";
+import { XpozClient, PaginatedResult, ResponseType } from "../src/index.js";
 import type {
   RedditPost,
   RedditUser,
@@ -55,20 +55,33 @@ describe("RedditUsers", () => {
 
 describe("RedditPosts", () => {
   let searchResult: PaginatedResult<RedditPost>;
+  let pagingResult: PaginatedResult<RedditPost>;
 
   beforeAll(async () => {
     if (!hasClient()) return;
     searchResult = await client.reddit.searchPosts("python", {
       fields: ["id", "title", "score"],
+      responseType: ResponseType.Fast,
+      limit: 10,
+    });
+    pagingResult = await client.reddit.searchPosts("python", {
+      fields: ["id", "title", "score"],
+      responseType: ResponseType.Paging,
     });
   });
 
-  it("search_posts", () => {
+  it("search_posts (fast mode)", () => {
     if (!hasClient()) return;
     expect(searchResult).toBeInstanceOf(PaginatedResult);
-    expect(searchResult.pagination.totalRows).toBeGreaterThan(0);
-    expect(searchResult.pagination.pageNumber).toBe(1);
     expect(searchResult.data.length).toBeGreaterThan(0);
+  });
+
+  it("search_posts (paging mode)", () => {
+    if (!hasClient()) return;
+    expect(pagingResult).toBeInstanceOf(PaginatedResult);
+    expect(pagingResult.data.length).toBeGreaterThan(0);
+    expect(pagingResult.pagination.totalRows).toBeGreaterThan(0);
+    expect(pagingResult.pagination.tableName).toBeTruthy();
   });
 
   it("search_posts with subreddit filter", async () => {
@@ -83,8 +96,8 @@ describe("RedditPosts", () => {
 
   it("search_posts pagination", async () => {
     if (!hasClient()) return;
-    if (!searchResult.hasNextPage()) return;
-    const page2 = await searchResult.nextPage();
+    if (!pagingResult.hasNextPage()) return;
+    const page2 = await pagingResult.nextPage();
     expect(page2).toBeInstanceOf(PaginatedResult);
     expect(page2.data.length).toBeGreaterThan(0);
   });

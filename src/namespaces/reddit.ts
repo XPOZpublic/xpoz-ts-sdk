@@ -9,6 +9,7 @@ import type {
   SubredditWithPosts,
 } from "../types/reddit.js";
 import * as tools from "../config/tools.js";
+import { ResponseType } from "../config/constants.js";
 
 type RawDict = Record<string, unknown>;
 
@@ -39,6 +40,8 @@ export class RedditNamespace extends BaseNamespace {
       time?: string;
       subreddit?: string;
       forceLatest?: boolean;
+      responseType?: ResponseType;
+      limit?: number;
     } = {}
   ): Promise<PaginatedResult<RedditPost>> {
     const args = this.buildArgs({ query, ...options });

@@ -2,6 +2,7 @@ import { BaseNamespace } from "./base.js";
 import { PaginatedResult } from "../pagination.js";
 import type { TwitterPost, TwitterUser } from "../types/twitter.js";
 import * as tools from "../config/tools.js";
+import { ResponseType } from "../config/constants.js";
 
 type RawDict = Record<string, unknown>;
 
@@ -26,20 +27,22 @@ export class TwitterNamespace extends BaseNamespace {
   async getPostsByAuthor(
     identifier: string,
     options: {
-      identifierType?: string;
       fields?: string[];
       startDate?: string;
       endDate?: string;
       forceLatest?: boolean;
+      responseType?: ResponseType;
+      limit?: number;
     } = {}
   ): Promise<PaginatedResult<TwitterPost>> {
     const args = this.buildArgs({
-      identifier,
-      identifierType: options.identifierType ?? "username",
+      username: identifier,
       fields: options.fields,
       startDate: options.startDate,
       endDate: options.endDate,
       forceLatest: options.forceLatest,
+      responseType: options.responseType,
+      limit: options.limit,
     });
     const result = await this.callAndMaybePoll(tools.GET_TWITTER_POSTS_BY_AUTHOR, args);
     return this.buildPaginatedResult(result, parseTwitterPost, tools.GET_TWITTER_POSTS_BY_AUTHOR, args);
@@ -55,7 +58,8 @@ export class TwitterNamespace extends BaseNamespace {
       authorId?: string;
       language?: string;
       forceLatest?: boolean;
-      responseType?: string;
+      responseType?: ResponseType;
+      limit?: number;
     } = {}
   ): Promise<PaginatedResult<TwitterPost>> {
     const args = this.buildArgs({
@@ -68,9 +72,10 @@ export class TwitterNamespace extends BaseNamespace {
       language: options.language,
       forceLatest: options.forceLatest,
       responseType: options.responseType,
+      limit: options.limit,
     });
 
-    if (options.responseType === "csv") {
+    if (options.responseType === ResponseType.Csv) {
       const raw = await this.callTool(tools.SEARCH_TWITTER_POSTS, args);
       const exportOpId =
         (raw["operationId"] as string) ?? (raw["dataDumpExportOperationId"] as string) ?? null;
@@ -191,6 +196,8 @@ export class TwitterNamespace extends BaseNamespace {
       endDate?: string;
       language?: string;
       forceLatest?: boolean;
+      responseType?: ResponseType;
+      limit?: number;
     } = {}
   ): Promise<PaginatedResult<TwitterUser>> {
     const args = this.buildArgs({ query, ...options });
