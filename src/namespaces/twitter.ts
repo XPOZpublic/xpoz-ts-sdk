@@ -2,6 +2,7 @@ import { BaseNamespace } from "./base.js";
 import { PaginatedResult } from "../pagination.js";
 import type { TwitterPost, TwitterUser } from "../types/twitter.js";
 import * as tools from "../config/tools.js";
+import { ResponseType } from "../config/constants.js";
 
 type RawDict = Record<string, unknown>;
 
@@ -30,7 +31,7 @@ export class TwitterNamespace extends BaseNamespace {
       startDate?: string;
       endDate?: string;
       forceLatest?: boolean;
-      responseType?: string;
+      responseType?: ResponseType;
       limit?: number;
     } = {}
   ): Promise<PaginatedResult<TwitterPost>> {
@@ -57,7 +58,7 @@ export class TwitterNamespace extends BaseNamespace {
       authorId?: string;
       language?: string;
       forceLatest?: boolean;
-      responseType?: string;
+      responseType?: ResponseType;
       limit?: number;
     } = {}
   ): Promise<PaginatedResult<TwitterPost>> {
@@ -74,7 +75,7 @@ export class TwitterNamespace extends BaseNamespace {
       limit: options.limit,
     });
 
-    if (options.responseType === "csv") {
+    if (options.responseType === ResponseType.Csv) {
       const raw = await this.callTool(tools.SEARCH_TWITTER_POSTS, args);
       const exportOpId =
         (raw["operationId"] as string) ?? (raw["dataDumpExportOperationId"] as string) ?? null;
@@ -195,7 +196,7 @@ export class TwitterNamespace extends BaseNamespace {
       endDate?: string;
       language?: string;
       forceLatest?: boolean;
-      responseType?: string;
+      responseType?: ResponseType;
       limit?: number;
     } = {}
   ): Promise<PaginatedResult<TwitterUser>> {

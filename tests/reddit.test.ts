@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { createTestClient } from "./setup.js";
-import { XpozClient, PaginatedResult } from "../src/index.js";
+import { XpozClient, PaginatedResult, ResponseType } from "../src/index.js";
 import type {
   RedditPost,
   RedditUser,
@@ -61,12 +61,12 @@ describe("RedditPosts", () => {
     if (!hasClient()) return;
     searchResult = await client.reddit.searchPosts("python", {
       fields: ["id", "title", "score"],
-      responseType: "fast",
+      responseType: ResponseType.Fast,
       limit: 10,
     });
     pagingResult = await client.reddit.searchPosts("python", {
       fields: ["id", "title", "score"],
-      responseType: "paging",
+      responseType: ResponseType.Paging,
     });
   });
 

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { createTestClient } from "./setup.js";
-import { XpozClient, PaginatedResult } from "../src/index.js";
+import { XpozClient, PaginatedResult, ResponseType } from "../src/index.js";
 import type { TwitterPost, TwitterUser } from "../src/index.js";
 
 const TWITTER_POST_ID = "1874266108200673750";
@@ -29,11 +29,11 @@ describe("TwitterUsers", () => {
   beforeAll(async () => {
     if (!hasClient()) return;
     usersByKeywordsFast = await client.twitter.getUsersByKeywords("artificial intelligence", {
-      responseType: "fast",
+      responseType: ResponseType.Fast,
       limit: 10,
     });
     usersByKeywordsPaging = await client.twitter.getUsersByKeywords("artificial intelligence", {
-      responseType: "paging",
+      responseType: ResponseType.Paging,
     });
   });
 
@@ -106,17 +106,17 @@ describe("TwitterPosts", () => {
     searchResult = await client.twitter.searchPosts("bitcoin", {
       startDate: "2025-01-01",
       fields: ["id", "text", "likeCount", "retweetCount"],
-      responseType: "fast",
+      responseType: ResponseType.Fast,
       limit: 10,
     });
     pagingResult = await client.twitter.searchPosts("bitcoin", {
       startDate: "2025-01-01",
       fields: ["id", "text", "likeCount", "retweetCount"],
-      responseType: "paging",
+      responseType: ResponseType.Paging,
     });
     csvResult = await client.twitter.searchPosts("bitcoin", {
       startDate: "2025-01-01",
-      responseType: "csv",
+      responseType: ResponseType.Csv,
     });
   });
 
@@ -124,7 +124,7 @@ describe("TwitterPosts", () => {
     if (!hasClient()) return;
     const result = await client.twitter.getPostsByAuthor("elonmusk", {
       fields: ["id", "text", "likeCount"],
-      responseType: "fast",
+      responseType: ResponseType.Fast,
       limit: 10,
     });
     expect(result).toBeInstanceOf(PaginatedResult);
@@ -138,7 +138,7 @@ describe("TwitterPosts", () => {
     if (!hasClient()) return;
     const result = await client.twitter.getPostsByAuthor("elonmusk", {
       fields: ["id", "text", "likeCount"],
-      responseType: "paging",
+      responseType: ResponseType.Paging,
     });
     expect(result).toBeInstanceOf(PaginatedResult);
     expect(result.data.length).toBeGreaterThan(0);

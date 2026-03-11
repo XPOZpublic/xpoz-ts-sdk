@@ -2,6 +2,7 @@ import { BaseNamespace } from "./base.js";
 import { PaginatedResult } from "../pagination.js";
 import type { InstagramPost, InstagramUser, InstagramComment } from "../types/instagram.js";
 import * as tools from "../config/tools.js";
+import { ResponseType } from "../config/constants.js";
 
 type RawDict = Record<string, unknown>;
 
@@ -35,7 +36,7 @@ export class InstagramNamespace extends BaseNamespace {
       startDate?: string;
       endDate?: string;
       forceLatest?: boolean;
-      responseType?: string;
+      responseType?: ResponseType;
       limit?: number;
     } = {}
   ): Promise<PaginatedResult<InstagramPost>> {
@@ -65,7 +66,7 @@ export class InstagramNamespace extends BaseNamespace {
       startDate?: string;
       endDate?: string;
       forceLatest?: boolean;
-      responseType?: string;
+      responseType?: ResponseType;
       limit?: number;
     } = {}
   ): Promise<PaginatedResult<InstagramPost>> {
@@ -162,7 +163,7 @@ export class InstagramNamespace extends BaseNamespace {
       startDate?: string;
       endDate?: string;
       forceLatest?: boolean;
-      responseType?: string;
+      responseType?: ResponseType;
       limit?: number;
     } = {}
   ): Promise<PaginatedResult<InstagramUser>> {

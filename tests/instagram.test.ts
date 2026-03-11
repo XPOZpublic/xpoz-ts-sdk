@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { createTestClient } from "./setup.js";
-import { XpozClient, PaginatedResult } from "../src/index.js";
+import { XpozClient, PaginatedResult, ResponseType } from "../src/index.js";
 import type { InstagramPost, InstagramUser } from "../src/index.js";
 
 const INSTAGRAM_POST_ID = "3650461835687763021_8763092944";
@@ -30,11 +30,11 @@ describe("InstagramUsers", () => {
   beforeAll(async () => {
     if (!hasClient()) return;
     usersByKeywordsFast = await client.instagram.getUsersByKeywords("fashion", {
-      responseType: "fast",
+      responseType: ResponseType.Fast,
       limit: 10,
     });
     usersByKeywordsPaging = await client.instagram.getUsersByKeywords("fashion", {
-      responseType: "paging",
+      responseType: ResponseType.Paging,
     });
   });
 
@@ -99,21 +99,21 @@ describe("InstagramPosts", () => {
     if (!hasClient()) return;
     postsFastResult = await client.instagram.getPostsByUser("instagram", {
       fields: ["id", "caption", "likeCount"],
-      responseType: "fast",
+      responseType: ResponseType.Fast,
       limit: 10,
     });
     postsPagingResult = await client.instagram.getPostsByUser("instagram", {
       fields: ["id", "caption", "likeCount"],
-      responseType: "paging",
+      responseType: ResponseType.Paging,
     });
     searchFastResult = await client.instagram.searchPosts("travel", {
       fields: ["id", "caption", "likeCount"],
-      responseType: "fast",
+      responseType: ResponseType.Fast,
       limit: 10,
     });
     searchPagingResult = await client.instagram.searchPosts("travel", {
       fields: ["id", "caption", "likeCount"],
-      responseType: "paging",
+      responseType: ResponseType.Paging,
     });
   });
 
