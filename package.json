@@ -1,6 +1,6 @@
 {
   "name": "@xpoz/xpoz",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "TypeScript SDK for the Xpoz social media intelligence platform",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -43,5 +43,14 @@
     "url": "https://github.com/XPOZpublic/xpoz-ts-sdk/issues"
   },
   "license": "MIT",
-  "keywords": ["xpoz", "social-media", "twitter", "instagram", "reddit", "sdk", "mcp", "api"]
+  "keywords": [
+    "xpoz",
+    "social-media",
+    "twitter",
+    "instagram",
+    "reddit",
+    "sdk",
+    "mcp",
+    "api"
+  ]
 }
