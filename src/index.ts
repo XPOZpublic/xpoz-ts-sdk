@@ -7,6 +7,7 @@ export {
   OperationTimeoutError,
   OperationFailedError,
   OperationCancelledError,
+  RateLimitError,
 } from "./errors.js";
 export { VERSION } from "./version.js";
 export { ResponseType } from "./config/constants.js";

@@ -52,3 +52,16 @@ export class OperationCancelledError extends XpozError {
     this.operationId = operationId;
   }
 }
+
+export class RateLimitError extends XpozError {
+  retryAfter: number | null;
+
+  constructor(retryAfter: number | null = null) {
+    const msg = retryAfter
+      ? `Rate limited by server (retry after ${Math.round(retryAfter)}s)`
+      : "Rate limited by server";
+    super(msg);
+    this.name = "RateLimitError";
+    this.retryAfter = retryAfter;
+  }
+}
