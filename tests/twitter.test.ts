@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { createTestClient } from "./setup.js";
+import { createTestClient, sevenDaysAgo } from "./setup.js";
 import { XpozClient, PaginatedResult, ResponseType } from "../src/index.js";
 import type { TwitterPost, TwitterUser } from "../src/index.js";
 
@@ -29,10 +29,12 @@ describe("TwitterUsers", () => {
   beforeAll(async () => {
     if (!hasClient()) return;
     usersByKeywordsFast = await client.twitter.getUsersByKeywords("artificial intelligence", {
+      startDate: sevenDaysAgo(),
       responseType: ResponseType.Fast,
       limit: 10,
     });
     usersByKeywordsPaging = await client.twitter.getUsersByKeywords("artificial intelligence", {
+      startDate: sevenDaysAgo(),
       responseType: ResponseType.Paging,
     });
   });
@@ -104,18 +106,18 @@ describe("TwitterPosts", () => {
   beforeAll(async () => {
     if (!hasClient()) return;
     searchResult = await client.twitter.searchPosts("bitcoin", {
-      startDate: "2025-01-01",
+      startDate: sevenDaysAgo(),
       fields: ["id", "text", "likeCount", "retweetCount"],
       responseType: ResponseType.Fast,
       limit: 10,
     });
     pagingResult = await client.twitter.searchPosts("bitcoin", {
-      startDate: "2025-01-01",
+      startDate: sevenDaysAgo(),
       fields: ["id", "text", "likeCount", "retweetCount"],
       responseType: ResponseType.Paging,
     });
     csvResult = await client.twitter.searchPosts("bitcoin", {
-      startDate: "2025-01-01",
+      startDate: sevenDaysAgo(),
       responseType: ResponseType.Csv,
     });
   });
@@ -123,6 +125,7 @@ describe("TwitterPosts", () => {
   it("get_posts_by_author (fast mode)", async () => {
     if (!hasClient()) return;
     const result = await client.twitter.getPostsByAuthor("elonmusk", {
+      startDate: sevenDaysAgo(),
       fields: ["id", "text", "likeCount"],
       responseType: ResponseType.Fast,
       limit: 10,
@@ -137,6 +140,7 @@ describe("TwitterPosts", () => {
   it("get_posts_by_author (paging mode)", async () => {
     if (!hasClient()) return;
     const result = await client.twitter.getPostsByAuthor("elonmusk", {
+      startDate: sevenDaysAgo(),
       fields: ["id", "text", "likeCount"],
       responseType: ResponseType.Paging,
     });
@@ -205,7 +209,7 @@ describe("TwitterPosts", () => {
 
   it("count_posts", async () => {
     if (!hasClient()) return;
-    const count = await client.twitter.countPosts("bitcoin", { startDate: "2025-01-01" });
+    const count = await client.twitter.countPosts("bitcoin", { startDate: sevenDaysAgo() });
     expect(typeof count).toBe("number");
     expect(count).toBeGreaterThan(0);
   });

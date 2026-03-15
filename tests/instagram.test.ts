@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { createTestClient } from "./setup.js";
+import { createTestClient, sevenDaysAgo } from "./setup.js";
 import { XpozClient, PaginatedResult, ResponseType } from "../src/index.js";
 import type { InstagramPost, InstagramUser } from "../src/index.js";
 
@@ -30,10 +30,12 @@ describe("InstagramUsers", () => {
   beforeAll(async () => {
     if (!hasClient()) return;
     usersByKeywordsFast = await client.instagram.getUsersByKeywords("fashion", {
+      startDate: sevenDaysAgo(),
       responseType: ResponseType.Fast,
       limit: 10,
     });
     usersByKeywordsPaging = await client.instagram.getUsersByKeywords("fashion", {
+      startDate: sevenDaysAgo(),
       responseType: ResponseType.Paging,
     });
   });
@@ -98,20 +100,24 @@ describe("InstagramPosts", () => {
   beforeAll(async () => {
     if (!hasClient()) return;
     postsFastResult = await client.instagram.getPostsByUser("instagram", {
+      startDate: sevenDaysAgo(),
       fields: ["id", "caption", "likeCount"],
       responseType: ResponseType.Fast,
       limit: 10,
     });
     postsPagingResult = await client.instagram.getPostsByUser("instagram", {
+      startDate: sevenDaysAgo(),
       fields: ["id", "caption", "likeCount"],
       responseType: ResponseType.Paging,
     });
     searchFastResult = await client.instagram.searchPosts("travel", {
+      startDate: sevenDaysAgo(),
       fields: ["id", "caption", "likeCount"],
       responseType: ResponseType.Fast,
       limit: 10,
     });
     searchPagingResult = await client.instagram.searchPosts("travel", {
+      startDate: sevenDaysAgo(),
       fields: ["id", "caption", "likeCount"],
       responseType: ResponseType.Paging,
     });
