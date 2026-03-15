@@ -1,5 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { StreamableHTTPClientTransport, StreamableHTTPError } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { RateLimitError } from "../errors.js";
 import { parseResponseText } from "../transform/responseParser.js";
 import { VERSION } from "../version.js";
 
@@ -31,7 +32,14 @@ export class McpTransport {
       { capabilities: {} }
     );
 
-    await this.client.connect(this.transport);
+    try {
+      await this.client.connect(this.transport);
+    } catch (error) {
+      if (error instanceof StreamableHTTPError && error.code === 429) {
+        throw new RateLimitError();
+      }
+      throw error;
+    }
   }
 
   async close(): Promise<void> {
@@ -51,10 +59,18 @@ export class McpTransport {
       throw new Error("Transport not connected. Call connect() first.");
     }
 
-    const result = await this.client.callTool({ name, arguments: args }) as {
+    let result: {
       isError?: boolean;
       content: Array<{ type: string; text?: string }>;
     };
+    try {
+      result = await this.client.callTool({ name, arguments: args }) as typeof result;
+    } catch (error) {
+      if (error instanceof StreamableHTTPError && error.code === 429) {
+        throw new RateLimitError();
+      }
+      throw error;
+    }
 
     if (result.isError) {
       let errorText = "";

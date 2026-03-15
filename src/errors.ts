@@ -54,14 +54,8 @@ export class OperationCancelledError extends XpozError {
 }
 
 export class RateLimitError extends XpozError {
-  retryAfter: number | null;
-
-  constructor(retryAfter: number | null = null) {
-    const msg = retryAfter
-      ? `Rate limited by server (retry after ${Math.round(retryAfter)}s)`
-      : "Rate limited by server";
-    super(msg);
+  constructor(message: string = "Rate limited by server") {
+    super(message);
     this.name = "RateLimitError";
-    this.retryAfter = retryAfter;
   }
 }
