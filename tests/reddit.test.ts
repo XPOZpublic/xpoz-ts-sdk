@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { createTestClient } from "./setup.js";
+import { createTestClient, sevenDaysAgo } from "./setup.js";
 import { XpozClient, PaginatedResult, ResponseType } from "../src/index.js";
 import type {
   RedditPost,
@@ -47,7 +47,9 @@ describe("RedditUsers", () => {
 
   it("get_users_by_keywords", async () => {
     if (!hasClient()) return;
-    const result = await client.reddit.getUsersByKeywords("programming");
+    const result = await client.reddit.getUsersByKeywords("programming", {
+      startDate: sevenDaysAgo(),
+    });
     expect(result).toBeInstanceOf(PaginatedResult);
     expect(result.data.length).toBeGreaterThan(0);
   });
@@ -60,11 +62,13 @@ describe("RedditPosts", () => {
   beforeAll(async () => {
     if (!hasClient()) return;
     searchResult = await client.reddit.searchPosts("python", {
+      startDate: sevenDaysAgo(),
       fields: ["id", "title", "score"],
       responseType: ResponseType.Fast,
       limit: 10,
     });
     pagingResult = await client.reddit.searchPosts("python", {
+      startDate: sevenDaysAgo(),
       fields: ["id", "title", "score"],
       responseType: ResponseType.Paging,
     });
@@ -87,6 +91,7 @@ describe("RedditPosts", () => {
   it("search_posts with subreddit filter", async () => {
     if (!hasClient()) return;
     const result = await client.reddit.searchPosts("help", {
+      startDate: sevenDaysAgo(),
       subreddit: "python",
       fields: ["id", "title", "subredditName"],
     });
@@ -113,7 +118,9 @@ describe("RedditPosts", () => {
 
   it("search_comments", async () => {
     if (!hasClient()) return;
-    const result = await client.reddit.searchComments("python");
+    const result = await client.reddit.searchComments("python", {
+      startDate: sevenDaysAgo(),
+    });
     expect(result).toBeInstanceOf(PaginatedResult);
     expect(result.data.length).toBeGreaterThan(0);
   });
@@ -142,7 +149,9 @@ describe("RedditSubreddits", () => {
 
   it("get_subreddits_by_keywords", async () => {
     if (!hasClient()) return;
-    const result = await client.reddit.getSubredditsByKeywords("programming");
+    const result = await client.reddit.getSubredditsByKeywords("programming", {
+      startDate: sevenDaysAgo(),
+    });
     expect(result).toBeInstanceOf(PaginatedResult);
     expect(result.data.length).toBeGreaterThan(0);
   });
