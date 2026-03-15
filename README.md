@@ -33,6 +33,7 @@ The SDK wraps Xpoz's [MCP](https://modelcontextprotocol.io) server, abstracting 
 - **30 data methods** across Twitter, Instagram, and Reddit
 - **Fully async** — all methods return `Promise<T>`
 - **Automatic operation polling** — long-running queries are abstracted away
+- **Response types** — choose between fast (immediate), paging (full pagination), or CSV export
 - **Server-side pagination** — `PaginatedResult<T>` with `nextPage()`, `getPage(n)`
 - **CSV export** — `exportCsv()` on any paginated result
 - **Field selection** — request only the fields you need
@@ -42,7 +43,7 @@ The SDK wraps Xpoz's [MCP](https://modelcontextprotocol.io) server, abstracting 
 ## Quick Start
 
 ```typescript
-import { XpozClient } from "@xpoz/xpoz";
+import { XpozClient, ResponseType } from "@xpoz/xpoz";
 
 const client = new XpozClient({ apiKey: "your-api-key" });
 await client.connect();
@@ -137,6 +138,73 @@ const user = await client.twitter.getUser("elonmusk", {
 
 Requesting fewer fields significantly improves response time.
 
+## Response Types
+
+Search and query methods support a `responseType` option that controls how results are returned. Import the `ResponseType` enum:
+
+```typescript
+import { XpozClient, ResponseType } from "@xpoz/xpoz";
+```
+
+| Mode | Enum Value | Behavior | Best For |
+| --- | --- | --- | --- |
+| **Fast** | `ResponseType.Fast` | Returns up to 300 results immediately, no async polling (default) | Quick queries, UI previews |
+| **Paging** | `ResponseType.Paging` | Async paginated query with full dataset access | Full analysis, large datasets |
+| **CSV** | `ResponseType.Csv` | Async bulk export, use `exportCsv()` to get download URL | Data exports |
+
+### Fast mode (default)
+
+The default behavior. Returns results immediately without polling. Use `limit` to constrain the number of results (max 300):
+
+```typescript
+const results = await client.twitter.searchPosts("bitcoin", {
+  startDate: "2025-01-01",
+  responseType: ResponseType.Fast,
+  limit: 50,
+});
+console.log(results.data.length); // up to 50 results, returned immediately
+```
+
+### Paging mode
+
+Returns paginated results with full `totalRows`, `totalPages`, and `tableName` for cursor-based navigation:
+
+```typescript
+const results = await client.twitter.searchPosts("bitcoin", {
+  startDate: "2025-01-01",
+  responseType: ResponseType.Paging, // optional — this is the default
+});
+console.log(results.pagination.totalRows);  // total matching rows
+if (results.hasNextPage()) {
+  const page2 = await results.nextPage();
+}
+```
+
+### CSV mode
+
+Initiates an async export. Call `exportCsv()` on the result to poll the export operation and get a download URL:
+
+```typescript
+const results = await client.twitter.searchPosts("bitcoin", {
+  startDate: "2025-01-01",
+  responseType: ResponseType.Csv,
+});
+const downloadUrl = await results.exportCsv();
+console.log(downloadUrl); // URL to download the CSV file
+```
+
+### Methods supporting `responseType` and `limit`
+
+The following methods accept both `responseType` and `limit`:
+
+- `twitter.getPostsByAuthor()`, `twitter.searchPosts()`, `twitter.getUsersByKeywords()`
+- `instagram.getPostsByUser()`, `instagram.searchPosts()`, `instagram.getUsersByKeywords()`
+- `reddit.searchPosts()`
+
+These methods accept `limit` only:
+
+- `twitter.searchUsers()`, `instagram.searchUsers()`, `reddit.searchUsers()`, `reddit.searchSubreddits()`
+
 ## Query Syntax
 
 The `query` parameter on all `search*` and `get*ByKeywords` methods supports a Lucene-style full-text syntax across Twitter, Instagram, and Reddit.
@@ -191,6 +259,7 @@ import {
   OperationTimeoutError,
   OperationFailedError,
   OperationCancelledError,
+  ResponseType,
 } from "@xpoz/xpoz";
 
 try {
@@ -228,10 +297,11 @@ const user = await client.twitter.getUser("44196397", { identifierType: "id" });
 
 #### `searchUsers(name, options?) -> Promise<TwitterUser[]>`
 
-Search users by name or username. Returns up to 10 results.
+Search users by name or username. Returns up to 10 results by default. Use `limit` to adjust.
 
 ```typescript
 const users = await client.twitter.searchUsers("elon");
+const topFive = await client.twitter.searchUsers("elon", { limit: 5 });
 ```
 
 #### `getUserConnections(username, connectionType, options?) -> Promise<PaginatedResult<TwitterUser>>`
@@ -245,11 +315,13 @@ const following = await client.twitter.getUserConnections("elonmusk", "following
 
 #### `getUsersByKeywords(query, options?) -> Promise<PaginatedResult<TwitterUser>>`
 
-Find users who authored posts matching a keyword query.
+Find users who authored posts matching a keyword query. Supports `responseType` and `limit`.
 
 ```typescript
 const users = await client.twitter.getUsersByKeywords('"machine learning"', {
   fields: ["username", "name", "followersCount"],
+  responseType: ResponseType.Fast,
+  limit: 20,
 });
 ```
 
@@ -263,17 +335,19 @@ const tweets = await client.twitter.getPostsByIds(["1234567890", "0987654321"]);
 
 #### `getPostsByAuthor(identifier, options?) -> Promise<PaginatedResult<TwitterPost>>`
 
-Get all posts by an author with optional date filtering.
+Get all posts by an author with optional date filtering. Supports `responseType` and `limit`.
 
 ```typescript
 const results = await client.twitter.getPostsByAuthor("elonmusk", {
   startDate: "2025-01-01",
+  responseType: ResponseType.Fast,
+  limit: 100,
 });
 ```
 
 #### `searchPosts(query, options?) -> Promise<PaginatedResult<TwitterPost>>`
 
-Full-text search with filters. Supports exact phrases (`"machine learning"`), boolean operators (`AI AND python`), and parentheses.
+Full-text search with filters. Supports exact phrases (`"machine learning"`), boolean operators (`AI AND python`), and parentheses. Supports `responseType` and `limit`.
 
 ```typescript
 const results = await client.twitter.searchPosts('"artificial intelligence" AND ethics', {
@@ -281,6 +355,8 @@ const results = await client.twitter.searchPosts('"artificial intelligence" AND 
   endDate: "2025-06-01",
   language: "en",
   fields: ["id", "text", "likeCount", "authorUsername", "createdAtDate"],
+  responseType: ResponseType.Fast,
+  limit: 50,
 });
 ```
 
@@ -338,8 +414,11 @@ console.log(`${user.fullName} — ${user.followerCount?.toLocaleString()} follow
 
 #### `searchUsers(name, options?) -> Promise<InstagramUser[]>`
 
+Search users by name. Use `limit` to adjust the number of results.
+
 ```typescript
 const users = await client.instagram.searchUsers("nasa");
+const topThree = await client.instagram.searchUsers("nasa", { limit: 3 });
 ```
 
 #### `getUserConnections(username, connectionType, options?) -> Promise<PaginatedResult<InstagramUser>>`
@@ -350,8 +429,13 @@ const followers = await client.instagram.getUserConnections("instagram", "follow
 
 #### `getUsersByKeywords(query, options?) -> Promise<PaginatedResult<InstagramUser>>`
 
+Find users who authored posts matching a keyword query. Supports `responseType` and `limit`.
+
 ```typescript
-const users = await client.instagram.getUsersByKeywords('"sustainable fashion"');
+const users = await client.instagram.getUsersByKeywords('"sustainable fashion"', {
+  responseType: ResponseType.Fast,
+  limit: 20,
+});
 ```
 
 #### `getPostsByIds(postIds, options?) -> Promise<InstagramPost[]>`
@@ -364,14 +448,24 @@ const posts = await client.instagram.getPostsByIds(["3606450040306139062_4836333
 
 #### `getPostsByUser(identifier, options?) -> Promise<PaginatedResult<InstagramPost>>`
 
+Get all posts by a user. Supports `responseType` and `limit`.
+
 ```typescript
-const results = await client.instagram.getPostsByUser("nasa");
+const results = await client.instagram.getPostsByUser("nasa", {
+  responseType: ResponseType.Fast,
+  limit: 50,
+});
 ```
 
 #### `searchPosts(query, options?) -> Promise<PaginatedResult<InstagramPost>>`
 
+Full-text search with filters. Supports `responseType` and `limit`.
+
 ```typescript
-const results = await client.instagram.searchPosts("travel photography");
+const results = await client.instagram.searchPosts("travel photography", {
+  responseType: ResponseType.Fast,
+  limit: 30,
+});
 ```
 
 #### `getComments(postId, options?) -> Promise<PaginatedResult<InstagramComment>>`
@@ -404,8 +498,11 @@ console.log(`${user.username} — ${user.totalKarma?.toLocaleString()} karma`);
 
 #### `searchUsers(name, options?) -> Promise<RedditUser[]>`
 
+Search users by name. Use `limit` to adjust the number of results.
+
 ```typescript
 const users = await client.reddit.searchUsers("spez");
+const topThree = await client.reddit.searchUsers("spez", { limit: 3 });
 ```
 
 #### `getUsersByKeywords(query, options?) -> Promise<PaginatedResult<RedditUser>>`
@@ -418,13 +515,15 @@ const users = await client.reddit.getUsersByKeywords('"machine learning"', {
 
 #### `searchPosts(query, options?) -> Promise<PaginatedResult<RedditPost>>`
 
-`sort`: `"relevance"`, `"hot"`, `"top"`, `"new"`, `"comments"`. `time`: `"hour"`, `"day"`, `"week"`, `"month"`, `"year"`, `"all"`.
+`sort`: `"relevance"`, `"hot"`, `"top"`, `"new"`, `"comments"`. `time`: `"hour"`, `"day"`, `"week"`, `"month"`, `"year"`, `"all"`. Supports `responseType` and `limit`.
 
 ```typescript
 const results = await client.reddit.searchPosts("python tutorial", {
   subreddit: "learnpython",
   sort: "top",
   time: "month",
+  responseType: ResponseType.Fast,
+  limit: 25,
 });
 ```
 
@@ -450,8 +549,11 @@ const comments = await client.reddit.searchComments("helpful tip", {
 
 #### `searchSubreddits(query, options?) -> Promise<RedditSubreddit[]>`
 
+Search subreddits by name. Use `limit` to adjust the number of results.
+
 ```typescript
 const subs = await client.reddit.searchSubreddits("machine learning");
+const topFive = await client.reddit.searchSubreddits("machine learning", { limit: 5 });
 ```
 
 #### `getSubredditWithPosts(subredditName, options?) -> Promise<SubredditWithPosts>`
@@ -636,12 +738,14 @@ All fields are optional and typed as their respective TypeScript types. Unknown 
 - `post: RedditPost`
 - `comments: RedditComment[]`
 - `commentsPagination: PaginationInfo | null`
+- `commentsTableName: string | null`
 
 **`SubredditWithPosts`** — returned by `getSubredditWithPosts()`:
 
 - `subreddit: RedditSubreddit`
 - `posts: RedditPost[]`
 - `postsPagination: PaginationInfo | null`
+- `postsTableName: string | null`
 
 ---
 
