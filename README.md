@@ -148,13 +148,13 @@ import { XpozClient, ResponseType } from "@xpoz/xpoz";
 
 | Mode | Enum Value | Behavior | Best For |
 | --- | --- | --- | --- |
-| **Fast** | `ResponseType.Fast` | Returns up to 300 results immediately, no async polling | Quick queries, UI previews |
-| **Paging** | `ResponseType.Paging` | Async paginated query with full dataset access (default) | Full analysis, large datasets |
+| **Fast** | `ResponseType.Fast` | Returns up to 300 results immediately, no async polling (default) | Quick queries, UI previews |
+| **Paging** | `ResponseType.Paging` | Async paginated query with full dataset access | Full analysis, large datasets |
 | **CSV** | `ResponseType.Csv` | Async bulk export, use `exportCsv()` to get download URL | Data exports |
 
-### Fast mode
+### Fast mode (default)
 
-Returns results immediately without polling. Use `limit` to constrain the number of results (max 300):
+The default behavior. Returns results immediately without polling. Use `limit` to constrain the number of results (max 300):
 
 ```typescript
 const results = await client.twitter.searchPosts("bitcoin", {
@@ -165,9 +165,9 @@ const results = await client.twitter.searchPosts("bitcoin", {
 console.log(results.data.length); // up to 50 results, returned immediately
 ```
 
-### Paging mode (default)
+### Paging mode
 
-The default behavior. Returns paginated results with full `totalRows`, `totalPages`, and `tableName` for cursor-based navigation:
+Returns paginated results with full `totalRows`, `totalPages`, and `tableName` for cursor-based navigation:
 
 ```typescript
 const results = await client.twitter.searchPosts("bitcoin", {
