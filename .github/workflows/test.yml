@@ -1,4 +1,4 @@
-name: Tests
+name: CI
 
 on:
   push:
@@ -7,9 +7,8 @@ on:
     branches: [main, master]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@v4
@@ -22,6 +21,22 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run build
+
+  test:
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
       - run: npm test
         env:
           XPOZ_API_KEY: ${{ secrets.XPOZ_API_KEY }}
