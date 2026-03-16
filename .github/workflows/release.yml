@@ -1,0 +1,124 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: "Version bump type"
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - custom
+        default: patch
+      custom_version:
+        description: "Custom version (only when type is 'custom', e.g. 1.2.3)"
+        required: false
+        type: string
+      run_tests:
+        description: "Run integration tests before publishing"
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+
+    steps:
+      - name: Validate inputs
+        run: |
+          if [ "${{ inputs.version_type }}" = "custom" ] && [ -z "${{ inputs.custom_version }}" ]; then
+            echo "::error::Custom version is required when version_type is 'custom'"
+            exit 1
+          fi
+          if [ "${{ inputs.version_type }}" = "custom" ]; then
+            if ! echo "${{ inputs.custom_version }}" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+              echo "::error::Custom version must be in semver format (e.g. 1.2.3)"
+              exit 1
+            fi
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: "https://registry.npmjs.org"
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Run tests
+        if: ${{ inputs.run_tests }}
+        run: npm test
+        env:
+          XPOZ_API_KEY: ${{ secrets.XPOZ_API_KEY }}
+
+      - name: Determine versions
+        id: versions
+        run: |
+          PREV_VERSION=$(node -p "require('./package.json').version")
+          echo "previous_version=$PREV_VERSION" >> "$GITHUB_OUTPUT"
+
+          if [ "${{ inputs.version_type }}" = "custom" ]; then
+            npm version "${{ inputs.custom_version }}" --no-git-tag-version --allow-same-version
+          else
+            npm version "${{ inputs.version_type }}" --no-git-tag-version
+          fi
+
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Update src/version.ts
+        run: |
+          echo 'export const VERSION = "${{ steps.versions.outputs.version }}";' > src/version.ts
+
+      - name: Verify version sync
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          TS_VERSION=$(node -p "require('fs').readFileSync('src/version.ts','utf8').match(/\"([^\"]+)\"/)[1]")
+          echo "package.json: $PKG_VERSION"
+          echo "version.ts:   $TS_VERSION"
+          if [ "$PKG_VERSION" != "$TS_VERSION" ]; then
+            echo "::error::Version mismatch between package.json ($PKG_VERSION) and version.ts ($TS_VERSION)"
+            exit 1
+          fi
+
+      - name: Commit and tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json src/version.ts
+          git commit -m "release: v${{ steps.versions.outputs.version }}"
+          git tag -a "v${{ steps.versions.outputs.version }}" -m "v${{ steps.versions.outputs.version }}"
+          git push origin master --follow-tags
+
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v${{ steps.versions.outputs.version }}" \
+            --title "v${{ steps.versions.outputs.version }}" \
+            --generate-notes \
+            --notes-start-tag "v${{ steps.versions.outputs.previous_version }}"
