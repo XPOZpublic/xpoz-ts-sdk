@@ -4,6 +4,7 @@ import { DEFAULT_SERVER_URL, DEFAULT_TIMEOUT_MS, ENV_API_KEY, ENV_SERVER_URL } f
 import { TwitterNamespace } from "./namespaces/twitter.js";
 import { InstagramNamespace } from "./namespaces/instagram.js";
 import { RedditNamespace } from "./namespaces/reddit.js";
+import { checkForUpdates } from "./versionCheck.js";
 
 export class XpozClient {
   twitter: TwitterNamespace;
@@ -11,11 +12,13 @@ export class XpozClient {
   reddit: RedditNamespace;
 
   private transport: McpTransport;
+  private versionCheck: boolean;
 
   constructor(options: {
     apiKey?: string;
     serverUrl?: string;
     timeoutMs?: number;
+    versionCheck?: boolean;
   } = {}) {
     const apiKey = options.apiKey ?? process.env[ENV_API_KEY];
     if (!apiKey) {
@@ -24,6 +27,8 @@ export class XpozClient {
           `(login → copy token), then pass it as apiKey or set the ${ENV_API_KEY} environment variable.`
       );
     }
+
+    this.versionCheck = options.versionCheck ?? true;
 
     const serverUrl =
       options.serverUrl ?? process.env[ENV_SERVER_URL] ?? DEFAULT_SERVER_URL;
@@ -39,6 +44,9 @@ export class XpozClient {
 
   async connect(): Promise<void> {
     await this.transport.connect();
+    if (this.versionCheck) {
+      checkForUpdates();
+    }
   }
 
   async close(): Promise<void> {
