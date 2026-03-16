@@ -38,7 +38,7 @@ export async function checkForUpdates(): Promise<void> {
   }
 }
 
-export function isNewerVersion(latest: string, current: string): boolean {
+function isNewerVersion(latest: string, current: string): boolean {
   const latestParts = latest.split(".").map(Number);
   const currentParts = current.split(".").map(Number);
 
