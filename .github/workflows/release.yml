@@ -17,11 +17,6 @@ on:
         description: "Custom version (only when type is 'custom', e.g. 1.2.3)"
         required: false
         type: string
-      run_tests:
-        description: "Run integration tests before publishing"
-        required: false
-        type: boolean
-        default: false
 
 concurrency:
   group: release
@@ -63,12 +58,6 @@ jobs:
 
       - name: Build
         run: npm run build
-
-      - name: Run tests
-        if: ${{ inputs.run_tests }}
-        run: npm test
-        env:
-          XPOZ_API_KEY: ${{ secrets.XPOZ_API_KEY }}
 
       - name: Determine versions
         id: versions
