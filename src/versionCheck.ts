@@ -38,15 +38,18 @@ export async function checkForUpdates(): Promise<void> {
   }
 }
 
-function isNewerVersion(latest: string, current: string): boolean {
-  const latestParts = latest.split(".").map(Number);
-  const currentParts = current.split(".").map(Number);
+function isNewerVersion(
+  latestVersion: string,
+  currentVersion: string
+): boolean {
+  const latestVersionParts = latestVersion.split(".").map(Number);
+  const currentVersionParts = currentVersion.split(".").map(Number);
 
   for (let i = 0; i < 3; i++) {
-    const l = latestParts[i] ?? 0;
-    const c = currentParts[i] ?? 0;
-    if (l > c) return true;
-    if (l < c) return false;
+    const latestVersionPart = latestVersionParts[i] ?? 0;
+    const currentVersionPart = currentVersionParts[i] ?? 0;
+    if (latestVersionPart > currentVersionPart) return true;
+    if (latestVersionPart < currentVersionPart) return false;
   }
   return false;
 }
