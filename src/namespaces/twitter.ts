@@ -57,6 +57,7 @@ export class TwitterNamespace extends BaseNamespace {
       authorUsername?: string;
       authorId?: string;
       language?: string;
+      filterRetweets?: boolean;
       forceLatest?: boolean;
       responseType?: ResponseType;
       limit?: number;
@@ -70,6 +71,7 @@ export class TwitterNamespace extends BaseNamespace {
       authorUsername: options.authorUsername,
       authorId: options.authorId,
       language: options.language,
+      filterRetweets: options.filterRetweets,
       forceLatest: options.forceLatest,
       responseType: options.responseType,
       limit: options.limit,

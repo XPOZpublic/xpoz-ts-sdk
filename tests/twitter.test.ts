@@ -172,6 +172,22 @@ describe("TwitterPosts", () => {
     expect(page2.data.length).toBeGreaterThan(0);
   });
 
+  it("search_posts with filterRetweets", async () => {
+    if (!hasClient()) return;
+    const result = await client.twitter.searchPosts("bitcoin", {
+      startDate: sevenDaysAgo(),
+      filterRetweets: true,
+      responseType: ResponseType.Fast,
+      limit: 10,
+    });
+    expect(result).toBeInstanceOf(PaginatedResult);
+    expect(result.data.length).toBeGreaterThan(0);
+    for (const post of result.data) {
+      const text = (post as TwitterPost).text ?? "";
+      expect(text.startsWith("RT @")).toBe(false);
+    }
+  });
+
   it("get_retweets", async () => {
     if (!hasClient()) return;
     const result = await client.twitter.getRetweets(TWITTER_POST_ID);
