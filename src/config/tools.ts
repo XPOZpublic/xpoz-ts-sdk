@@ -7,6 +7,7 @@ export const GET_TWITTER_COMMENTS = "getTwitterPostComments";
 export const GET_TWITTER_POST_INTERACTING_USERS = "getTwitterPostInteractingUsers";
 export const COUNT_TWEETS = "countTweets";
 export const GET_TWITTER_USER = "getTwitterUser";
+export const GET_TWITTER_USERS = "getTwitterUsers";
 export const SEARCH_TWITTER_USERS = "searchTwitterUsers";
 export const GET_TWITTER_USER_CONNECTIONS = "getTwitterUserConnections";
 export const GET_TWITTER_USERS_BY_KEYWORDS = "getTwitterUsersByKeywords";
