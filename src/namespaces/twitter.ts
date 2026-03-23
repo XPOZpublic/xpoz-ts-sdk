@@ -20,7 +20,10 @@ export class TwitterNamespace extends BaseNamespace {
     options: { fields?: string[]; forceLatest?: boolean } = {}
   ): Promise<TwitterPost[]> {
     const args = this.buildArgs({ postIds, ...options });
-    const result = await this.callAndMaybePoll(tools.GET_TWITTER_POSTS_BY_IDS, args);
+    const result = await this.callAndMaybePoll(
+      tools.GET_TWITTER_POSTS_BY_IDS,
+      args
+    );
     return ((result["results"] as RawDict[]) ?? []).map(parseTwitterPost);
   }
 
@@ -44,8 +47,16 @@ export class TwitterNamespace extends BaseNamespace {
       responseType: options.responseType,
       limit: options.limit,
     });
-    const result = await this.callAndMaybePoll(tools.GET_TWITTER_POSTS_BY_AUTHOR, args);
-    return this.buildPaginatedResult(result, parseTwitterPost, tools.GET_TWITTER_POSTS_BY_AUTHOR, args);
+    const result = await this.callAndMaybePoll(
+      tools.GET_TWITTER_POSTS_BY_AUTHOR,
+      args
+    );
+    return this.buildPaginatedResult(
+      result,
+      parseTwitterPost,
+      tools.GET_TWITTER_POSTS_BY_AUTHOR,
+      args
+    );
   }
 
   async searchPosts(
@@ -57,6 +68,7 @@ export class TwitterNamespace extends BaseNamespace {
       authorUsername?: string;
       authorId?: string;
       language?: string;
+      filterOutRetweets?: boolean;
       forceLatest?: boolean;
       responseType?: ResponseType;
       limit?: number;
@@ -70,6 +82,7 @@ export class TwitterNamespace extends BaseNamespace {
       authorUsername: options.authorUsername,
       authorId: options.authorId,
       language: options.language,
+      filterOutRetweets: options.filterOutRetweets,
       forceLatest: options.forceLatest,
       responseType: options.responseType,
       limit: options.limit,
@@ -78,13 +91,31 @@ export class TwitterNamespace extends BaseNamespace {
     if (options.responseType === ResponseType.Csv) {
       const raw = await this.callTool(tools.SEARCH_TWITTER_POSTS, args);
       const exportOpId =
-        (raw["operationId"] as string) ?? (raw["dataDumpExportOperationId"] as string) ?? null;
-      const csvRaw: RawDict = { results: [], dataDumpExportOperationId: exportOpId };
-      return this.buildPaginatedResult(csvRaw, parseTwitterPost, tools.SEARCH_TWITTER_POSTS, args);
+        (raw["operationId"] as string) ??
+        (raw["dataDumpExportOperationId"] as string) ??
+        null;
+      const csvRaw: RawDict = {
+        results: [],
+        dataDumpExportOperationId: exportOpId,
+      };
+      return this.buildPaginatedResult(
+        csvRaw,
+        parseTwitterPost,
+        tools.SEARCH_TWITTER_POSTS,
+        args
+      );
     }
 
-    const result = await this.callAndMaybePoll(tools.SEARCH_TWITTER_POSTS, args);
-    return this.buildPaginatedResult(result, parseTwitterPost, tools.SEARCH_TWITTER_POSTS, args);
+    const result = await this.callAndMaybePoll(
+      tools.SEARCH_TWITTER_POSTS,
+      args
+    );
+    return this.buildPaginatedResult(
+      result,
+      parseTwitterPost,
+      tools.SEARCH_TWITTER_POSTS,
+      args
+    );
   }
 
   async getRetweets(
@@ -92,26 +123,55 @@ export class TwitterNamespace extends BaseNamespace {
     options: { fields?: string[]; startDate?: string } = {}
   ): Promise<PaginatedResult<TwitterPost>> {
     const args = this.buildArgs({ postId, ...options });
-    const result = await this.callAndMaybePoll(tools.GET_TWITTER_RETWEETS, args);
-    return this.buildPaginatedResult(result, parseTwitterPost, tools.GET_TWITTER_RETWEETS, args);
+    const result = await this.callAndMaybePoll(
+      tools.GET_TWITTER_RETWEETS,
+      args
+    );
+    return this.buildPaginatedResult(
+      result,
+      parseTwitterPost,
+      tools.GET_TWITTER_RETWEETS,
+      args
+    );
   }
 
   async getQuotes(
     postId: string,
-    options: { fields?: string[]; startDate?: string; forceLatest?: boolean } = {}
+    options: {
+      fields?: string[];
+      startDate?: string;
+      forceLatest?: boolean;
+    } = {}
   ): Promise<PaginatedResult<TwitterPost>> {
     const args = this.buildArgs({ postId, ...options });
     const result = await this.callAndMaybePoll(tools.GET_TWITTER_QUOTES, args);
-    return this.buildPaginatedResult(result, parseTwitterPost, tools.GET_TWITTER_QUOTES, args);
+    return this.buildPaginatedResult(
+      result,
+      parseTwitterPost,
+      tools.GET_TWITTER_QUOTES,
+      args
+    );
   }
 
   async getComments(
     postId: string,
-    options: { fields?: string[]; startDate?: string; forceLatest?: boolean } = {}
+    options: {
+      fields?: string[];
+      startDate?: string;
+      forceLatest?: boolean;
+    } = {}
   ): Promise<PaginatedResult<TwitterPost>> {
     const args = this.buildArgs({ postId, ...options });
-    const result = await this.callAndMaybePoll(tools.GET_TWITTER_COMMENTS, args);
-    return this.buildPaginatedResult(result, parseTwitterPost, tools.GET_TWITTER_COMMENTS, args);
+    const result = await this.callAndMaybePoll(
+      tools.GET_TWITTER_COMMENTS,
+      args
+    );
+    return this.buildPaginatedResult(
+      result,
+      parseTwitterPost,
+      tools.GET_TWITTER_COMMENTS,
+      args
+    );
   }
 
   async getPostInteractingUsers(
@@ -120,7 +180,10 @@ export class TwitterNamespace extends BaseNamespace {
     options: { fields?: string[]; forceLatest?: boolean } = {}
   ): Promise<PaginatedResult<TwitterUser>> {
     const args = this.buildArgs({ postId, interactionType, ...options });
-    const result = await this.callAndMaybePoll(tools.GET_TWITTER_POST_INTERACTING_USERS, args);
+    const result = await this.callAndMaybePoll(
+      tools.GET_TWITTER_POST_INTERACTING_USERS,
+      args
+    );
     return this.buildPaginatedResult(
       result,
       parseUser,
@@ -169,7 +232,10 @@ export class TwitterNamespace extends BaseNamespace {
     options: { limit?: number; fields?: string[] } = {}
   ): Promise<TwitterUser[]> {
     const args = this.buildArgs({ name, ...options });
-    const result = await this.callAndMaybePoll(tools.SEARCH_TWITTER_USERS, args);
+    const result = await this.callAndMaybePoll(
+      tools.SEARCH_TWITTER_USERS,
+      args
+    );
     return ((result["results"] as RawDict[]) ?? []).map(parseUser);
   }
 
@@ -179,7 +245,10 @@ export class TwitterNamespace extends BaseNamespace {
     options: { fields?: string[]; forceLatest?: boolean } = {}
   ): Promise<PaginatedResult<TwitterUser>> {
     const args = this.buildArgs({ username, connectionType, ...options });
-    const result = await this.callAndMaybePoll(tools.GET_TWITTER_USER_CONNECTIONS, args);
+    const result = await this.callAndMaybePoll(
+      tools.GET_TWITTER_USER_CONNECTIONS,
+      args
+    );
     return this.buildPaginatedResult(
       result,
       parseUser,
@@ -201,7 +270,10 @@ export class TwitterNamespace extends BaseNamespace {
     } = {}
   ): Promise<PaginatedResult<TwitterUser>> {
     const args = this.buildArgs({ query, ...options });
-    const result = await this.callAndMaybePoll(tools.GET_TWITTER_USERS_BY_KEYWORDS, args);
+    const result = await this.callAndMaybePoll(
+      tools.GET_TWITTER_USERS_BY_KEYWORDS,
+      args
+    );
     return this.buildPaginatedResult(
       result,
       parseUser,

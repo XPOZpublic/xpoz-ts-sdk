@@ -28,15 +28,21 @@ describe("TwitterUsers", () => {
 
   beforeAll(async () => {
     if (!hasClient()) return;
-    usersByKeywordsFast = await client.twitter.getUsersByKeywords("artificial intelligence", {
-      startDate: sevenDaysAgo(),
-      responseType: ResponseType.Fast,
-      limit: 10,
-    });
-    usersByKeywordsPaging = await client.twitter.getUsersByKeywords("artificial intelligence", {
-      startDate: sevenDaysAgo(),
-      responseType: ResponseType.Paging,
-    });
+    usersByKeywordsFast = await client.twitter.getUsersByKeywords(
+      "artificial intelligence",
+      {
+        startDate: sevenDaysAgo(),
+        responseType: ResponseType.Fast,
+        limit: 10,
+      }
+    );
+    usersByKeywordsPaging = await client.twitter.getUsersByKeywords(
+      "artificial intelligence",
+      {
+        startDate: sevenDaysAgo(),
+        responseType: ResponseType.Paging,
+      }
+    );
   });
 
   it("get_user by username", async () => {
@@ -48,7 +54,9 @@ describe("TwitterUsers", () => {
 
   it("get_user by id", async () => {
     if (!hasClient()) return;
-    const user = await client.twitter.getUser("44196397", { identifierType: "id" });
+    const user = await client.twitter.getUser("44196397", {
+      identifierType: "id",
+    });
     expect(user).toBeDefined();
     expect((user as TwitterUser).id).toBe("44196397");
   });
@@ -77,7 +85,10 @@ describe("TwitterUsers", () => {
 
   it("get_user_connections", async () => {
     if (!hasClient()) return;
-    const result = await client.twitter.getUserConnections("elonmusk", "followers");
+    const result = await client.twitter.getUserConnections(
+      "elonmusk",
+      "followers"
+    );
     expect(result).toBeInstanceOf(PaginatedResult);
     expect(result.pagination.totalRows).toBeGreaterThan(0);
     expect(result.data.length).toBeGreaterThan(0);
@@ -172,6 +183,22 @@ describe("TwitterPosts", () => {
     expect(page2.data.length).toBeGreaterThan(0);
   });
 
+  it("search_posts with filterOutRetweets", async () => {
+    if (!hasClient()) return;
+    const result = await client.twitter.searchPosts("bitcoin", {
+      startDate: sevenDaysAgo(),
+      filterOutRetweets: true,
+      responseType: ResponseType.Fast,
+      limit: 10,
+    });
+    expect(result).toBeInstanceOf(PaginatedResult);
+    expect(result.data.length).toBeGreaterThan(0);
+    for (const post of result.data) {
+      const text = (post as TwitterPost).text ?? "";
+      expect(text.startsWith("RT @")).toBe(false);
+    }
+  });
+
   it("get_retweets", async () => {
     if (!hasClient()) return;
     const result = await client.twitter.getRetweets(TWITTER_POST_ID);
@@ -209,7 +236,9 @@ describe("TwitterPosts", () => {
 
   it("count_posts", async () => {
     if (!hasClient()) return;
-    const count = await client.twitter.countPosts("bitcoin", { startDate: sevenDaysAgo() });
+    const count = await client.twitter.countPosts("bitcoin", {
+      startDate: sevenDaysAgo(),
+    });
     expect(typeof count).toBe("number");
     expect(count).toBeGreaterThan(0);
   });
