@@ -210,6 +210,20 @@ export class TwitterNamespace extends BaseNamespace {
     return Number(count);
   }
 
+  async getUsers(
+    identifiers: string[],
+    options: { identifierType?: string; fields?: string[]; forceLatest?: boolean } = {}
+  ): Promise<TwitterUser[]> {
+    const args = this.buildArgs({
+      identifiers,
+      identifierType: options.identifierType ?? "username",
+      fields: options.fields,
+      forceLatest: options.forceLatest,
+    });
+    const result = await this.callAndMaybePoll(tools.GET_TWITTER_USERS, args);
+    return ((result["results"] as RawDict[]) ?? []).map(parseUser);
+  }
+
   async getUser(
     identifier: string,
     options: { identifierType?: string; fields?: string[] } = {}

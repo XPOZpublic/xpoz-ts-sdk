@@ -45,6 +45,26 @@ describe("TwitterUsers", () => {
     );
   });
 
+  it("get_users by usernames", async () => {
+    if (!hasClient()) return;
+    const users = await client.twitter.getUsers(["elonmusk", "sama"]);
+    expect(Array.isArray(users)).toBe(true);
+    expect(users.length).toBe(2);
+    for (const u of users) {
+      expect((u as TwitterUser).username).toBeTruthy();
+    }
+  });
+
+  it("get_users by ids", async () => {
+    if (!hasClient()) return;
+    const users = await client.twitter.getUsers(["44196397"], {
+      identifierType: "id",
+    });
+    expect(Array.isArray(users)).toBe(true);
+    expect(users.length).toBe(1);
+    expect((users[0] as TwitterUser).id).toBe("44196397");
+  });
+
   it("get_user by username", async () => {
     if (!hasClient()) return;
     const user = await client.twitter.getUser("elonmusk");
