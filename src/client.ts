@@ -4,12 +4,14 @@ import { DEFAULT_SERVER_URL, DEFAULT_TIMEOUT_MS, ENV_API_KEY, ENV_SERVER_URL } f
 import { TwitterNamespace } from "./namespaces/twitter.js";
 import { InstagramNamespace } from "./namespaces/instagram.js";
 import { RedditNamespace } from "./namespaces/reddit.js";
+import { TiktokNamespace } from "./namespaces/tiktok.js";
 import { checkForUpdates } from "./versionCheck.js";
 
 export class XpozClient {
   twitter: TwitterNamespace;
   instagram: InstagramNamespace;
   reddit: RedditNamespace;
+  tiktok: TiktokNamespace;
 
   private transport: McpTransport;
   private versionCheck: boolean;
@@ -40,6 +42,7 @@ export class XpozClient {
     this.twitter = new TwitterNamespace(callTool, timeoutMs);
     this.instagram = new InstagramNamespace(callTool, timeoutMs);
     this.reddit = new RedditNamespace(callTool, timeoutMs);
+    this.tiktok = new TiktokNamespace(callTool, timeoutMs);
   }
 
   async connect(): Promise<void> {
