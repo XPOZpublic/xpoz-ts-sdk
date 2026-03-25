@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { createTestClient, sevenDaysAgo } from "./setup.js";
 import { XpozClient, PaginatedResult, ResponseType } from "../src/index.js";
 import type { TiktokPost, TiktokUser } from "../src/index.js";
+import { expectHasFields, expectPaginationStructure } from "./schemaValidators.js";
 
 let client: XpozClient;
 
@@ -43,6 +44,7 @@ describe("TiktokUsers", () => {
     const user = await client.tiktok.getUser("tiktok");
     expect(user).toBeDefined();
     expect((user as TiktokUser).username).toBe("tiktok");
+    expectHasFields(user as Record<string, unknown>, ["id", "username", "nickname"], "TiktokUser");
   });
 
   it("get_user with fields", async () => {
@@ -74,8 +76,7 @@ describe("TiktokUsers", () => {
     if (!hasClient()) return;
     expect(usersByKeywordsPaging).toBeInstanceOf(PaginatedResult);
     expect(usersByKeywordsPaging.data.length).toBeGreaterThan(0);
-    expect(usersByKeywordsPaging.pagination.totalRows).toBeGreaterThan(0);
-    expect(usersByKeywordsPaging.pagination.tableName).toBeTruthy();
+    expectPaginationStructure(usersByKeywordsPaging);
   });
 });
 
@@ -121,8 +122,7 @@ describe("TiktokPosts", () => {
     if (!hasClient()) return;
     expect(postsPagingResult).toBeInstanceOf(PaginatedResult);
     expect(postsPagingResult.data.length).toBeGreaterThan(0);
-    expect(postsPagingResult.pagination.totalRows).toBeGreaterThan(0);
-    expect(postsPagingResult.pagination.tableName).toBeTruthy();
+    expectPaginationStructure(postsPagingResult);
   });
 
   it("search_posts (fast mode)", () => {
@@ -135,8 +135,7 @@ describe("TiktokPosts", () => {
     if (!hasClient()) return;
     expect(searchPagingResult).toBeInstanceOf(PaginatedResult);
     expect(searchPagingResult.data.length).toBeGreaterThan(0);
-    expect(searchPagingResult.pagination.totalRows).toBeGreaterThan(0);
-    expect(searchPagingResult.pagination.tableName).toBeTruthy();
+    expectPaginationStructure(searchPagingResult);
   });
 
   it("get_posts_by_ids", async () => {

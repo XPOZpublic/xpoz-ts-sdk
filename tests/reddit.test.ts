@@ -8,6 +8,7 @@ import type {
   RedditPostWithComments,
   SubredditWithPosts,
 } from "../src/index.js";
+import { expectHasFields, expectPaginationStructure } from "./schemaValidators.js";
 
 const REDDIT_POST_ID = "1l4da15";
 
@@ -36,6 +37,7 @@ describe("RedditUsers", () => {
     const u = user as RedditUser & { error?: string };
     if (u.error) return;
     expect(u.username).toBe("spez");
+    expectHasFields(user as Record<string, unknown>, ["id", "username", "totalKarma"], "RedditUser");
   });
 
   it("search_users", async () => {
