@@ -22,3 +22,4 @@ export type {
   RedditPostWithComments,
   SubredditWithPosts,
 } from "./types/reddit.js";
+export type { TiktokPost, TiktokUser, TiktokComment } from "./types/tiktok.js";
