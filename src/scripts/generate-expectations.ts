@@ -32,7 +32,7 @@ function extractInterfaceFields(filePath: string): Record<string, string[]> {
   return result;
 }
 
-const toolNames = Object.values(tools).filter((v): v is string => typeof v === 'string').sort();
+const toolNames = (Object.values(tools) as unknown[]).filter((v): v is string => typeof v === 'string').sort();
 
 const twitterInterfaces = extractInterfaceFields(resolve(typesDir, 'twitter.ts'));
 const instagramInterfaces = extractInterfaceFields(resolve(typesDir, 'instagram.ts'));
