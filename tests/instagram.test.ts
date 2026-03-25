@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { createTestClient, sevenDaysAgo } from "./setup.js";
 import { XpozClient, PaginatedResult, ResponseType } from "../src/index.js";
 import type { InstagramPost, InstagramUser } from "../src/index.js";
+import { expectHasFields, expectPaginationStructure } from "./schemaValidators.js";
 
 const INSTAGRAM_POST_ID = "3650461835687763021_8763092944";
 
@@ -45,6 +46,7 @@ describe("InstagramUsers", () => {
     const user = await client.instagram.getUser("instagram");
     expect(user).toBeDefined();
     expect((user as InstagramUser).username).toBe("instagram");
+    expectHasFields(user as Record<string, unknown>, ["id", "username", "fullName"], "InstagramUser");
   });
 
   it("get_user with fields", async () => {
@@ -86,8 +88,7 @@ describe("InstagramUsers", () => {
     if (!hasClient()) return;
     expect(usersByKeywordsPaging).toBeInstanceOf(PaginatedResult);
     expect(usersByKeywordsPaging.data.length).toBeGreaterThan(0);
-    expect(usersByKeywordsPaging.pagination.totalRows).toBeGreaterThan(0);
-    expect(usersByKeywordsPaging.pagination.tableName).toBeTruthy();
+    expectPaginationStructure(usersByKeywordsPaging);
   });
 });
 

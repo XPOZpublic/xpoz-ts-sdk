@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { createTestClient, sevenDaysAgo } from "./setup.js";
 import { XpozClient, PaginatedResult, ResponseType } from "../src/index.js";
 import type { TwitterPost, TwitterUser } from "../src/index.js";
+import { expectHasFields, expectPaginationStructure } from "./schemaValidators.js";
 
 const TWITTER_POST_ID = "1874266108200673750";
 
@@ -70,6 +71,7 @@ describe("TwitterUsers", () => {
     const user = await client.twitter.getUser("elonmusk");
     expect(user).toBeDefined();
     expect((user as TwitterUser).username).toBe("elonmusk");
+    expectHasFields(user as Record<string, unknown>, ["id", "username", "name"], "TwitterUser");
   });
 
   it("get_user by id", async () => {
@@ -124,8 +126,7 @@ describe("TwitterUsers", () => {
     if (!hasClient()) return;
     expect(usersByKeywordsPaging).toBeInstanceOf(PaginatedResult);
     expect(usersByKeywordsPaging.data.length).toBeGreaterThan(0);
-    expect(usersByKeywordsPaging.pagination.totalRows).toBeGreaterThan(0);
-    expect(usersByKeywordsPaging.pagination.tableName).toBeTruthy();
+    expectPaginationStructure(usersByKeywordsPaging);
   });
 });
 

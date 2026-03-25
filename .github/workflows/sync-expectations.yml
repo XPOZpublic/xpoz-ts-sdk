@@ -1,0 +1,51 @@
+name: Sync SDK Expectations
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/types/**'
+      - 'src/config/tools.ts'
+      - 'src/namespaces/**'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Generate expectations
+        run: node dist/scripts/generate-expectations.js > /tmp/ts-expectations.json
+
+      - name: Checkout xpoz-mcp
+        uses: actions/checkout@v4
+        with:
+          repository: hossenco/xpoz-mcp
+          path: xpoz-mcp
+          token: ${{ secrets.CROSS_REPO_PAT }}
+
+      - name: Update expectations
+        run: cp /tmp/ts-expectations.json xpoz-mcp/sdk-compat/ts-expectations.json
+
+      - name: Create PR if changed
+        working-directory: xpoz-mcp
+        env:
+          GH_TOKEN: ${{ secrets.CROSS_REPO_PAT }}
+        run: |
+          git diff --quiet sdk-compat/ts-expectations.json && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          BRANCH="auto/update-ts-sdk-expectations"
+          git checkout -b "$BRANCH"
+          git add sdk-compat/ts-expectations.json
+          git commit -m "chore: update TypeScript SDK expectations"
+          git push -u origin "$BRANCH" --force
+          gh pr create --title "chore: update TypeScript SDK expectations" --body "Auto-generated from xpoz-ts type changes." --base main || true
