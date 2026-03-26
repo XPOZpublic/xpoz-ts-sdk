@@ -111,3 +111,17 @@ jobs:
             --title "v${{ steps.versions.outputs.version }}" \
             --generate-notes \
             --notes-start-tag "v${{ steps.versions.outputs.previous_version }}"
+
+  notify-failure:
+    runs-on: ubuntu-latest
+    needs: [release]
+    if: always() && contains(needs.*.result, 'failure')
+    steps:
+      - uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.SLACK_DEPLOYMENT_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
+          payload: |
+            {
+              "text": "❌ **RELEASE FAILED**\nxpoz-ts@${{ github.sha }}\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>"
+            }
