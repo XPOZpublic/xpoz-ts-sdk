@@ -1,9 +1,22 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import type { FetchLike } from "@modelcontextprotocol/sdk/shared/transport.js";
 import { parseResponseText } from "../transform/responseParser.js";
 import { VERSION } from "../version.js";
 
 const USER_AGENT = `xpoz-ts-sdk/${VERSION}`;
+
+function getProxyUrl(): string | undefined {
+  return process.env.HTTPS_PROXY ?? process.env.https_proxy
+    ?? process.env.HTTP_PROXY ?? process.env.http_proxy;
+}
+
+async function createProxyFetch(proxyUrl: string): Promise<FetchLike> {
+  const { ProxyAgent, fetch: undiciFetch } = await import("undici");
+  const dispatcher = new ProxyAgent(proxyUrl);
+  return ((input: string | URL, init?: RequestInit) =>
+    undiciFetch(input as any, { ...(init as any), dispatcher })) as unknown as FetchLike;
+}
 
 export class McpTransport {
   private serverUrl: string;
@@ -22,8 +35,12 @@ export class McpTransport {
       Authorization: `Bearer ${this.apiKey}`,
     };
 
+    const proxyUrl = getProxyUrl();
+    const customFetch = proxyUrl ? await createProxyFetch(proxyUrl) : undefined;
+
     this.transport = new StreamableHTTPClientTransport(new URL(this.serverUrl), {
       requestInit: { headers },
+      ...(customFetch ? { fetch: customFetch } : {}),
     });
 
     this.client = new Client(
