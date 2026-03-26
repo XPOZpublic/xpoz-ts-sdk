@@ -49,3 +49,17 @@ jobs:
           git commit -m "chore: update TypeScript SDK expectations"
           git push -u origin "$BRANCH" --force
           gh pr create --title "chore: update TypeScript SDK expectations" --body "Auto-generated from xpoz-ts type changes." --base main || true
+
+  notify-failure:
+    runs-on: ubuntu-latest
+    needs: [sync]
+    if: always() && contains(needs.*.result, 'failure')
+    steps:
+      - uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.SLACK_DEPLOYMENT_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
+          payload: |
+            {
+              "text": "❌ **SYNC EXPECTATIONS FAILED**\nxpoz-ts@${{ github.sha }}\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>"
+            }
