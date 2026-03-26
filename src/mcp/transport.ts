@@ -54,6 +54,11 @@ export class McpTransport {
   async close(): Promise<void> {
     if (this.client) {
       try {
+        await this.transport?.terminateSession();
+      } catch {
+        // ignore — server may not support session termination (405)
+      }
+      try {
         await this.client.close();
       } catch {
         // ignore errors on close
