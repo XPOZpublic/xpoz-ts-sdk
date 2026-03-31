@@ -28,7 +28,6 @@ export class TiktokNamespace extends BaseNamespace {
     return ((result["results"] as RawDict[]) ?? []).map(parsePost);
   }
 
-  /* TEMPORARILY DISABLED
   async getPostsByUser(
     identifier: string,
     options: {
@@ -59,7 +58,6 @@ export class TiktokNamespace extends BaseNamespace {
       args
     );
   }
-  */
 
   async searchPosts(
     query: string,
@@ -125,7 +123,6 @@ export class TiktokNamespace extends BaseNamespace {
     return ((result["results"] as RawDict[]) ?? []).map(parseUser);
   }
 
-  /* TEMPORARILY DISABLED
   async getUsersByKeywords(
     query: string,
     options: {
@@ -146,5 +143,4 @@ export class TiktokNamespace extends BaseNamespace {
       args
     );
   }
-  */
 }
