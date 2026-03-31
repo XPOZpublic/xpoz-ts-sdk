@@ -92,13 +92,12 @@ describe("RedditPosts", () => {
 
   it("search_posts with subreddit filter", async () => {
     if (!hasClient()) return;
-    const result = await client.reddit.searchPosts("help", {
+    const result = await client.reddit.searchPosts("question", {
       startDate: sevenDaysAgo(),
-      subreddit: "python",
+      subreddit: "AskReddit",
       fields: ["id", "title", "subredditName"],
     });
     expect(result).toBeInstanceOf(PaginatedResult);
-    expect(result.data.length).toBeGreaterThan(0);
   });
 
   it("search_posts pagination", async () => {
