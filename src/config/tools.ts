@@ -33,11 +33,9 @@ export const GET_REDDIT_SUBREDDIT_WITH_POSTS = "getRedditSubredditWithPostsByNam
 export const GET_REDDIT_SUBREDDITS_BY_KEYWORDS = "getRedditSubredditsByKeywords";
 
 export const GET_TIKTOK_POSTS_BY_IDS = "getTiktokPostsByIds";
-// TEMPORARILY DISABLED
-// export const GET_TIKTOK_POSTS_BY_USER = "getTiktokPostsByUser";
+export const GET_TIKTOK_POSTS_BY_USER = "getTiktokPostsByUser";
 export const SEARCH_TIKTOK_POSTS = "getTiktokPostsByKeywords";
 export const GET_TIKTOK_COMMENTS = "getTiktokCommentsByPostId";
 export const GET_TIKTOK_USER = "getTiktokUser";
 export const SEARCH_TIKTOK_USERS = "searchTiktokUsers";
-// TEMPORARILY DISABLED
-// export const GET_TIKTOK_USERS_BY_KEYWORDS = "getTiktokUsersByKeywords";
+export const GET_TIKTOK_USERS_BY_KEYWORDS = "getTiktokUsersByKeywords";
