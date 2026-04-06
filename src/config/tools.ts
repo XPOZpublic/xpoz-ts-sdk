@@ -39,3 +39,7 @@ export const GET_TIKTOK_COMMENTS = "getTiktokCommentsByPostId";
 export const GET_TIKTOK_USER = "getTiktokUser";
 export const SEARCH_TIKTOK_USERS = "searchTiktokUsers";
 export const GET_TIKTOK_USERS_BY_KEYWORDS = "getTiktokUsersByKeywords";
+
+export const GET_TRACKED_ITEMS = "getTrackedItems";
+export const ADD_TRACKED_ITEMS = "addTrackedItems";
+export const REMOVE_TRACKED_ITEMS = "removeTrackedItems";
