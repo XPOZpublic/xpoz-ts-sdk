@@ -96,7 +96,7 @@ jobs:
           git add package.json package-lock.json src/version.ts
           git commit -m "release: v${{ steps.versions.outputs.version }}"
           git tag -a "v${{ steps.versions.outputs.version }}" -m "v${{ steps.versions.outputs.version }}"
-          git push origin master --follow-tags
+          git push origin main --follow-tags
 
       - name: Publish to npm
         run: npm publish --access public
