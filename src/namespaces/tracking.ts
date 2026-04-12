@@ -6,8 +6,6 @@ import type {
 } from "../types/tracking.js";
 import * as tools from "../config/tools.js";
 
-type RawDict = Record<string, unknown>;
-
 export class TrackingNamespace extends BaseNamespace {
   async getTrackedItems(): Promise<TrackedItem[]> {
     const result = await this.callTool(tools.GET_TRACKED_ITEMS, {});

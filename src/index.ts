@@ -23,4 +23,5 @@ export type {
   SubredditWithPosts,
 } from "./types/reddit.js";
 export type { TiktokPost, TiktokUser, TiktokComment } from "./types/tiktok.js";
+export { TrackedItemType, TrackedItemPlatform } from "./types/tracking.js";
 export type { TrackedItem, AddTrackedItemsResult, RemoveTrackedItemsResult } from "./types/tracking.js";

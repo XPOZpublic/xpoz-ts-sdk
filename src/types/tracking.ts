@@ -1,7 +1,20 @@
+export enum TrackedItemType {
+  Keyword = "keyword",
+  User = "user",
+  Subreddit = "subreddit",
+}
+
+export enum TrackedItemPlatform {
+  Twitter = "twitter",
+  Instagram = "instagram",
+  Reddit = "reddit",
+  TikTok = "tiktok",
+}
+
 export interface TrackedItem {
   phrase?: string;
-  type?: "keyword" | "user" | "subreddit";
-  platform?: "twitter" | "instagram" | "reddit" | "tiktok";
+  type?: TrackedItemType;
+  platform?: TrackedItemPlatform;
 }
 
 export interface AddTrackedItemsResult {
