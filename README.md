@@ -30,7 +30,7 @@ The SDK wraps Xpoz's [MCP](https://modelcontextprotocol.io) server, abstracting 
 
 ## Features
 
-- **30 data methods** across Twitter, Instagram, and Reddit
+- **40 data methods** across Twitter, Instagram, Reddit, and TikTok
 - **Fully async** — all methods return `Promise<T>`
 - **Automatic operation polling** — long-running queries are abstracted away
 - **Response types** — choose between fast (immediate), paging (full pagination), or CSV export
@@ -38,7 +38,7 @@ The SDK wraps Xpoz's [MCP](https://modelcontextprotocol.io) server, abstracting 
 - **CSV export** — `exportCsv()` on any paginated result
 - **Field selection** — request only the fields you need
 - **TypeScript-first** — fully typed results with autocomplete support
-- **Namespaced API** — `client.twitter.*`, `client.instagram.*`, `client.reddit.*`
+- **Namespaced API** — `client.twitter.*`, `client.instagram.*`, `client.reddit.*`, `client.tiktok.*`, `client.tracking.*`
 
 ## Quick Start
 
@@ -200,10 +200,12 @@ The following methods accept both `responseType` and `limit`:
 - `twitter.getPostsByAuthor()`, `twitter.searchPosts()`, `twitter.getUsersByKeywords()`
 - `instagram.getPostsByUser()`, `instagram.searchPosts()`, `instagram.getUsersByKeywords()`
 - `reddit.searchPosts()`
+- `tiktok.getPostsByUser()`, `tiktok.searchPosts()`, `tiktok.getUsersByKeywords()`
 
 These methods accept `limit` only:
 
 - `twitter.searchUsers()`, `instagram.searchUsers()`, `reddit.searchUsers()`, `reddit.searchSubreddits()`
+- `tiktok.searchUsers()`
 
 ## Query Syntax
 
@@ -574,6 +576,122 @@ const subs = await client.reddit.getSubredditsByKeywords("cryptocurrency");
 
 ---
 
+### TikTok — `client.tiktok`
+
+#### `getUser(identifier, options?) -> Promise<TiktokUser>`
+
+```typescript
+const user = await client.tiktok.getUser("charlidamelio");
+console.log(`${user.nickname} — ${user.followerCount?.toLocaleString()} followers`);
+
+// By numeric ID
+const user = await client.tiktok.getUser("123456789", { identifierType: "id" });
+```
+
+#### `searchUsers(name, options?) -> Promise<TiktokUser[]>`
+
+Search users by name. Use `limit` to adjust the number of results.
+
+```typescript
+const users = await client.tiktok.searchUsers("charli");
+const topFive = await client.tiktok.searchUsers("charli", { limit: 5 });
+```
+
+#### `getUsersByKeywords(query, options?) -> Promise<PaginatedResult<TiktokUser>>`
+
+Find users who authored posts matching a keyword query. Supports `responseType` and `limit`.
+
+```typescript
+const users = await client.tiktok.getUsersByKeywords('"machine learning"', {
+  responseType: ResponseType.Fast,
+  limit: 20,
+});
+```
+
+#### `getPostsByIds(postIds, options?) -> Promise<TiktokPost[]>`
+
+Get 1-100 posts by their IDs.
+
+```typescript
+const posts = await client.tiktok.getPostsByIds(["7123456789012345678"]);
+```
+
+#### `getPostsByUser(identifier, options?) -> Promise<PaginatedResult<TiktokPost>>`
+
+Get all posts by a user. Supports `responseType` and `limit`.
+
+```typescript
+const results = await client.tiktok.getPostsByUser("charlidamelio", {
+  startDate: "2025-01-01",
+  responseType: ResponseType.Fast,
+  limit: 50,
+});
+```
+
+#### `searchPosts(query, options?) -> Promise<PaginatedResult<TiktokPost>>`
+
+Full-text search with filters. Supports `responseType` and `limit`.
+
+```typescript
+const results = await client.tiktok.searchPosts("travel vlog", {
+  startDate: "2025-01-01",
+  responseType: ResponseType.Fast,
+  limit: 30,
+});
+```
+
+#### `getComments(postId, options?) -> Promise<PaginatedResult<TiktokComment>>`
+
+```typescript
+const comments = await client.tiktok.getComments("7123456789012345678");
+```
+
+---
+
+### Tracking — `client.tracking`
+
+Manage tracked items (keywords, users, subreddits) that Xpoz monitors on your behalf. Import the enums to build items:
+
+```typescript
+import { XpozClient, TrackedItemType, TrackedItemPlatform } from "@xpoz/xpoz";
+```
+
+#### `getTrackedItems() -> Promise<TrackedItem[]>`
+
+List all currently tracked items on your account.
+
+```typescript
+const items = await client.tracking.getTrackedItems();
+for (const item of items) {
+  console.log(`${item.platform} / ${item.type}: ${item.phrase}`);
+}
+```
+
+#### `addTrackedItems(items) -> Promise<AddTrackedItemsResult>`
+
+Add one or more items to track.
+
+```typescript
+const result = await client.tracking.addTrackedItems([
+  { phrase: "bitcoin", type: TrackedItemType.Keyword, platform: TrackedItemPlatform.Twitter },
+  { phrase: "nasa", type: TrackedItemType.User, platform: TrackedItemPlatform.Instagram },
+]);
+console.log(`Added ${result.addedCount} items (${result.currentCount}/${result.maxTrackedItems} used)`);
+```
+
+#### `removeTrackedItems(items) -> Promise<RemoveTrackedItemsResult>`
+
+Remove one or more tracked items.
+
+```typescript
+const result = await client.tracking.removeTrackedItems([
+  { phrase: "bitcoin", type: TrackedItemType.Keyword, platform: TrackedItemPlatform.Twitter },
+]);
+console.log(`Removed ${result.removedCount} items`);
+```
+
+---
+
 ## Type Models
 
 All fields are optional and typed as their respective TypeScript types. Unknown fields are preserved on the object.
@@ -730,6 +848,88 @@ All fields are optional and typed as their respective TypeScript types. Unknown 
 | `activeUserCount`   | `number`  | Active users      |
 | `over18`            | `boolean` | NSFW flag         |
 | `createdAtDate`     | `string`  | Creation date     |
+
+### TiktokPost
+
+| Field                        | Type      | Description                  |
+| ---------------------------- | --------- | ---------------------------- |
+| `id`                         | `string`  | Post ID                      |
+| `description`                | `string`  | Post caption/description     |
+| `descriptionLanguage`        | `string`  | Language of description      |
+| `userId`                     | `string`  | Author user ID               |
+| `username`                   | `string`  | Author username              |
+| `nickname`                   | `string`  | Author display name          |
+| `likeCount`                  | `number`  | Number of likes              |
+| `commentCount`               | `number`  | Number of comments           |
+| `playCount`                  | `number`  | Video play count             |
+| `collectCount`               | `number`  | Number of collects/saves     |
+| `downloadCount`              | `number`  | Number of downloads          |
+| `forwardCount`               | `number`  | Number of forwards/shares    |
+| `videoThumbnail`             | `string`  | Thumbnail URL                |
+| `postType`                   | `number`  | Post type code               |
+| `isPrivate`                  | `boolean` | Private post flag            |
+| `createdAt`                  | `string`  | Creation timestamp           |
+| `createdAtDate`              | `string`  | Creation date (YYYY-MM-DD)   |
+
+### TiktokUser
+
+| Field            | Type      | Description              |
+| ---------------- | --------- | ------------------------ |
+| `id`             | `string`  | User ID                  |
+| `username`       | `string`  | Username                 |
+| `nickname`       | `string`  | Display name             |
+| `signature`      | `string`  | Bio text                 |
+| `secUid`         | `string`  | Secure user ID           |
+| `avatar`         | `string`  | Profile picture URL      |
+| `isPrivate`      | `boolean` | Private account          |
+| `isVerified`     | `boolean` | Verified status          |
+| `followerCount`  | `number`  | Number of followers      |
+| `followingCount` | `number`  | Number of following      |
+| `likeCount`      | `number`  | Total likes received     |
+| `postCount`      | `number`  | Total posts              |
+| `language`       | `string`  | Profile language         |
+| `region`         | `string`  | Account region           |
+| `createdAt`      | `string`  | Account creation date    |
+
+### TiktokComment
+
+| Field           | Type     | Description              |
+| --------------- | -------- | ------------------------ |
+| `id`            | `string` | Comment ID               |
+| `postId`        | `string` | Parent post ID           |
+| `userId`        | `string` | Author user ID           |
+| `username`      | `string` | Author username          |
+| `text`          | `string` | Comment text             |
+| `likeCount`     | `number` | Number of likes          |
+| `createdAt`     | `string` | Creation timestamp       |
+| `createdAtDate` | `string` | Creation date (YYYY-MM-DD) |
+
+### TrackedItem
+
+| Field      | Type                   | Description                                              |
+| ---------- | ---------------------- | -------------------------------------------------------- |
+| `phrase`   | `string`               | Keyword, username, or subreddit name to track            |
+| `type`     | `TrackedItemType`      | `"keyword"`, `"user"`, or `"subreddit"`                  |
+| `platform` | `TrackedItemPlatform`  | `"twitter"`, `"instagram"`, `"reddit"`, or `"tiktok"`   |
+
+### AddTrackedItemsResult
+
+| Field             | Type      | Description                        |
+| ----------------- | --------- | ---------------------------------- |
+| `success`         | `boolean` | Whether the operation succeeded    |
+| `addedCount`      | `number`  | Number of items added              |
+| `message`         | `string`  | Status message                     |
+| `currentCount`    | `number`  | Total tracked items after addition |
+| `maxTrackedItems` | `number`  | Plan limit for tracked items       |
+| `planName`        | `string`  | Current plan name                  |
+
+### RemoveTrackedItemsResult
+
+| Field          | Type      | Description                     |
+| -------------- | --------- | ------------------------------- |
+| `success`      | `boolean` | Whether the operation succeeded |
+| `removedCount` | `number`  | Number of items removed         |
+| `message`      | `string`  | Status message                  |
 
 ### Composite Types
 
