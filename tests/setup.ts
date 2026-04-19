@@ -6,6 +6,12 @@ export function sevenDaysAgo(): string {
   return date.toISOString().slice(0, 10);
 }
 
+export function oneYearAgo(): string {
+  const date = new Date();
+  date.setFullYear(date.getFullYear() - 1);
+  return date.toISOString().slice(0, 10);
+}
+
 export function createTestClient(): XpozClient | null {
   const apiKey = process.env["XPOZ_API_KEY"];
   if (!apiKey) return null;
