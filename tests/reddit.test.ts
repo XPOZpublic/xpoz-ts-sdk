@@ -150,9 +150,7 @@ describe("RedditSubreddits", () => {
 
   it("get_subreddits_by_keywords", async () => {
     if (!hasClient()) return;
-    const result = await client.reddit.getSubredditsByKeywords("programming", {
-      startDate: sevenDaysAgo(),
-    });
+    const result = await client.reddit.getSubredditsByKeywords("programming");
     expect(result).toBeInstanceOf(PaginatedResult);
     expect(result.data.length).toBeGreaterThan(0);
   });

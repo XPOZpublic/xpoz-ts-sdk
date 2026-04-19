@@ -27,7 +27,12 @@ export async function waitForResult(
       throw new OperationCancelledError(operationId);
     }
 
-    if (status === "completed" || "results" in result || "downloadUrl" in result) {
+    if (
+      status === "completed" ||
+      status === "no_data" ||
+      "results" in result ||
+      "downloadUrl" in result
+    ) {
       return result;
     }
 
