@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { createTestClient, sevenDaysAgo, oneYearAgo } from "./setup.js";
+import { createTestClient, sevenDaysAgo } from "./setup.js";
 import { XpozClient, PaginatedResult, ResponseType } from "../src/index.js";
 import type {
   RedditPost,
@@ -150,9 +150,7 @@ describe("RedditSubreddits", () => {
 
   it("get_subreddits_by_keywords", async () => {
     if (!hasClient()) return;
-    const result = await client.reddit.getSubredditsByKeywords("programming", {
-      startDate: oneYearAgo(),
-    });
+    const result = await client.reddit.getSubredditsByKeywords("programming");
     expect(result).toBeInstanceOf(PaginatedResult);
     expect(result.data.length).toBeGreaterThan(0);
   });
