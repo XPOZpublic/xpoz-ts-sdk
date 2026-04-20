@@ -1,5 +1,6 @@
 import { BaseNamespace } from "./base.js";
 import { PaginatedResult } from "../pagination.js";
+import { NoDataResult } from "../results.js";
 import type { TwitterPost, TwitterUser } from "../types/twitter.js";
 import * as tools from "../config/tools.js";
 import { ResponseType } from "../config/constants.js";
@@ -37,7 +38,7 @@ export class TwitterNamespace extends BaseNamespace {
       responseType?: ResponseType;
       limit?: number;
     } = {}
-  ): Promise<PaginatedResult<TwitterPost>> {
+  ): Promise<PaginatedResult<TwitterPost> | NoDataResult> {
     const args = this.buildArgs({
       username: identifier,
       fields: options.fields,
@@ -73,7 +74,7 @@ export class TwitterNamespace extends BaseNamespace {
       responseType?: ResponseType;
       limit?: number;
     } = {}
-  ): Promise<PaginatedResult<TwitterPost>> {
+  ): Promise<PaginatedResult<TwitterPost> | NoDataResult> {
     const args = this.buildArgs({
       query,
       fields: options.fields,
@@ -121,7 +122,7 @@ export class TwitterNamespace extends BaseNamespace {
   async getRetweets(
     postId: string,
     options: { fields?: string[]; startDate?: string } = {}
-  ): Promise<PaginatedResult<TwitterPost>> {
+  ): Promise<PaginatedResult<TwitterPost> | NoDataResult> {
     const args = this.buildArgs({ postId, ...options });
     const result = await this.callAndMaybePoll(
       tools.GET_TWITTER_RETWEETS,
@@ -142,7 +143,7 @@ export class TwitterNamespace extends BaseNamespace {
       startDate?: string;
       forceLatest?: boolean;
     } = {}
-  ): Promise<PaginatedResult<TwitterPost>> {
+  ): Promise<PaginatedResult<TwitterPost> | NoDataResult> {
     const args = this.buildArgs({ postId, ...options });
     const result = await this.callAndMaybePoll(tools.GET_TWITTER_QUOTES, args);
     return this.buildPaginatedResult(
@@ -160,7 +161,7 @@ export class TwitterNamespace extends BaseNamespace {
       startDate?: string;
       forceLatest?: boolean;
     } = {}
-  ): Promise<PaginatedResult<TwitterPost>> {
+  ): Promise<PaginatedResult<TwitterPost> | NoDataResult> {
     const args = this.buildArgs({ postId, ...options });
     const result = await this.callAndMaybePoll(
       tools.GET_TWITTER_COMMENTS,
@@ -178,7 +179,7 @@ export class TwitterNamespace extends BaseNamespace {
     postId: string,
     interactionType: string,
     options: { fields?: string[]; forceLatest?: boolean } = {}
-  ): Promise<PaginatedResult<TwitterUser>> {
+  ): Promise<PaginatedResult<TwitterUser> | NoDataResult> {
     const args = this.buildArgs({ postId, interactionType, ...options });
     const result = await this.callAndMaybePoll(
       tools.GET_TWITTER_POST_INTERACTING_USERS,
@@ -257,7 +258,7 @@ export class TwitterNamespace extends BaseNamespace {
     username: string,
     connectionType: string,
     options: { fields?: string[]; forceLatest?: boolean } = {}
-  ): Promise<PaginatedResult<TwitterUser>> {
+  ): Promise<PaginatedResult<TwitterUser> | NoDataResult> {
     const args = this.buildArgs({ username, connectionType, ...options });
     const result = await this.callAndMaybePoll(
       tools.GET_TWITTER_USER_CONNECTIONS,
@@ -282,7 +283,7 @@ export class TwitterNamespace extends BaseNamespace {
       responseType?: ResponseType;
       limit?: number;
     } = {}
-  ): Promise<PaginatedResult<TwitterUser>> {
+  ): Promise<PaginatedResult<TwitterUser> | NoDataResult> {
     const args = this.buildArgs({ query, ...options });
     const result = await this.callAndMaybePoll(
       tools.GET_TWITTER_USERS_BY_KEYWORDS,

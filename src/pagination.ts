@@ -1,6 +1,10 @@
 import type { PaginationInfo } from "./types/common.js";
+import { NoDataResult } from "./results.js";
 
-type FetchPage<T> = (pageNumber: number, tableName: string | null | undefined) => Promise<PaginatedResult<T>>;
+type FetchPage<T> = (
+  pageNumber: number,
+  tableName: string | null | undefined
+) => Promise<PaginatedResult<T> | NoDataResult>;
 type FetchExport = (exportOperationId: string) => Promise<string>;
 
 export class PaginatedResult<T> {
@@ -31,14 +35,16 @@ export class PaginatedResult<T> {
     return this.pagination.pageNumber < this.pagination.totalPages;
   }
 
-  async nextPage(): Promise<PaginatedResult<T>> {
+  async nextPage(): Promise<PaginatedResult<T> | NoDataResult> {
     if (!this.hasNextPage()) {
       throw new RangeError("No more pages available");
     }
     return this._fetchPageResult(this.pagination.pageNumber + 1);
   }
 
-  async getPage(pageNumber: number): Promise<PaginatedResult<T>> {
+  async getPage(
+    pageNumber: number
+  ): Promise<PaginatedResult<T> | NoDataResult> {
     if (pageNumber < 1 || pageNumber > this.pagination.totalPages) {
       throw new RangeError(
         `Page ${pageNumber} out of range (1-${this.pagination.totalPages})`
@@ -54,7 +60,9 @@ export class PaginatedResult<T> {
     return this._fetchExport(this._exportOperationId);
   }
 
-  private _fetchPageResult(pageNumber: number): Promise<PaginatedResult<T>> {
+  private _fetchPageResult(
+    pageNumber: number
+  ): Promise<PaginatedResult<T> | NoDataResult> {
     return this._fetchPage(pageNumber, this._tableName);
   }
 

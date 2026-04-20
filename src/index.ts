@@ -1,5 +1,6 @@
 export { XpozClient } from "./client.js";
 export { PaginatedResult } from "./pagination.js";
+export { NoDataResult } from "./results.js";
 export {
   XpozError,
   AuthenticationError,

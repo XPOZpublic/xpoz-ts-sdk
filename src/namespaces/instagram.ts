@@ -1,5 +1,6 @@
 import { BaseNamespace } from "./base.js";
 import { PaginatedResult } from "../pagination.js";
+import { NoDataResult } from "../results.js";
 import type { InstagramPost, InstagramUser, InstagramComment } from "../types/instagram.js";
 import * as tools from "../config/tools.js";
 import { ResponseType } from "../config/constants.js";
@@ -39,7 +40,7 @@ export class InstagramNamespace extends BaseNamespace {
       responseType?: ResponseType;
       limit?: number;
     } = {}
-  ): Promise<PaginatedResult<InstagramPost>> {
+  ): Promise<PaginatedResult<InstagramPost> | NoDataResult> {
     const args = this.buildArgs({
       identifier,
       identifierType: options.identifierType ?? "username",
@@ -69,7 +70,7 @@ export class InstagramNamespace extends BaseNamespace {
       responseType?: ResponseType;
       limit?: number;
     } = {}
-  ): Promise<PaginatedResult<InstagramPost>> {
+  ): Promise<PaginatedResult<InstagramPost> | NoDataResult> {
     const args = this.buildArgs({
       query,
       fields: options.fields,
@@ -91,7 +92,7 @@ export class InstagramNamespace extends BaseNamespace {
       endDate?: string;
       forceLatest?: boolean;
     } = {}
-  ): Promise<PaginatedResult<InstagramComment>> {
+  ): Promise<PaginatedResult<InstagramComment> | NoDataResult> {
     const args = this.buildArgs({ postId, ...options });
     const result = await this.callAndMaybePoll(tools.GET_INSTAGRAM_COMMENTS, args);
     return this.buildPaginatedResult(result, parseComment, tools.GET_INSTAGRAM_COMMENTS, args);
@@ -127,7 +128,7 @@ export class InstagramNamespace extends BaseNamespace {
     username: string,
     connectionType: string,
     options: { fields?: string[]; forceLatest?: boolean } = {}
-  ): Promise<PaginatedResult<InstagramUser>> {
+  ): Promise<PaginatedResult<InstagramUser> | NoDataResult> {
     const args = this.buildArgs({ username, connectionType, ...options });
     const result = await this.callAndMaybePoll(tools.GET_INSTAGRAM_USER_CONNECTIONS, args);
     return this.buildPaginatedResult(
@@ -142,7 +143,7 @@ export class InstagramNamespace extends BaseNamespace {
     postId: string,
     interactionType: string,
     options: { fields?: string[]; forceLatest?: boolean } = {}
-  ): Promise<PaginatedResult<InstagramUser>> {
+  ): Promise<PaginatedResult<InstagramUser> | NoDataResult> {
     const args = this.buildArgs({ postId, interactionType, ...options });
     const result = await this.callAndMaybePoll(
       tools.GET_INSTAGRAM_POST_INTERACTING_USERS,
@@ -166,7 +167,7 @@ export class InstagramNamespace extends BaseNamespace {
       responseType?: ResponseType;
       limit?: number;
     } = {}
-  ): Promise<PaginatedResult<InstagramUser>> {
+  ): Promise<PaginatedResult<InstagramUser> | NoDataResult> {
     const args = this.buildArgs({ query, ...options });
     const result = await this.callAndMaybePoll(tools.GET_INSTAGRAM_USERS_BY_KEYWORDS, args);
     return this.buildPaginatedResult(

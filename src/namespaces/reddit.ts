@@ -1,5 +1,6 @@
 import { BaseNamespace } from "./base.js";
 import { PaginatedResult } from "../pagination.js";
+import { NoDataResult } from "../results.js";
 import type {
   RedditPost,
   RedditUser,
@@ -43,7 +44,7 @@ export class RedditNamespace extends BaseNamespace {
       responseType?: ResponseType;
       limit?: number;
     } = {}
-  ): Promise<PaginatedResult<RedditPost>> {
+  ): Promise<PaginatedResult<RedditPost> | NoDataResult> {
     const args = this.buildArgs({ query, ...options });
     const result = await this.callAndMaybePoll(tools.SEARCH_REDDIT_POSTS, args);
     return this.buildPaginatedResult(result, parsePost, tools.SEARCH_REDDIT_POSTS, args);
@@ -70,7 +71,7 @@ export class RedditNamespace extends BaseNamespace {
       endDate?: string;
       subreddit?: string;
     } = {}
-  ): Promise<PaginatedResult<RedditComment>> {
+  ): Promise<PaginatedResult<RedditComment> | NoDataResult> {
     const args = this.buildArgs({ query, ...options });
     const result = await this.callAndMaybePoll(tools.SEARCH_REDDIT_COMMENTS, args);
     return this.buildPaginatedResult(result, parseComment, tools.SEARCH_REDDIT_COMMENTS, args);
@@ -107,7 +108,7 @@ export class RedditNamespace extends BaseNamespace {
       subreddit?: string;
       forceLatest?: boolean;
     } = {}
-  ): Promise<PaginatedResult<RedditUser>> {
+  ): Promise<PaginatedResult<RedditUser> | NoDataResult> {
     const args = this.buildArgs({ query, ...options });
     const result = await this.callAndMaybePoll(tools.GET_REDDIT_USERS_BY_KEYWORDS, args);
     return this.buildPaginatedResult(
@@ -148,7 +149,7 @@ export class RedditNamespace extends BaseNamespace {
       endDate?: string;
       forceLatest?: boolean;
     } = {}
-  ): Promise<PaginatedResult<RedditSubreddit>> {
+  ): Promise<PaginatedResult<RedditSubreddit> | NoDataResult> {
     const args = this.buildArgs({ query, ...options });
     const result = await this.callAndMaybePoll(tools.GET_REDDIT_SUBREDDITS_BY_KEYWORDS, args);
     return this.buildPaginatedResult(

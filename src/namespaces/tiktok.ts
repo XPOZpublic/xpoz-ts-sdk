@@ -1,5 +1,6 @@
 import { BaseNamespace } from "./base.js";
 import { PaginatedResult } from "../pagination.js";
+import { NoDataResult } from "../results.js";
 import type { TiktokPost, TiktokUser, TiktokComment } from "../types/tiktok.js";
 import * as tools from "../config/tools.js";
 import { ResponseType } from "../config/constants.js";
@@ -39,7 +40,7 @@ export class TiktokNamespace extends BaseNamespace {
       responseType?: ResponseType;
       limit?: number;
     } = {}
-  ): Promise<PaginatedResult<TiktokPost>> {
+  ): Promise<PaginatedResult<TiktokPost> | NoDataResult> {
     const args = this.buildArgs({
       identifier,
       identifierType: options.identifierType ?? "username",
@@ -69,7 +70,7 @@ export class TiktokNamespace extends BaseNamespace {
       responseType?: ResponseType;
       limit?: number;
     } = {}
-  ): Promise<PaginatedResult<TiktokPost>> {
+  ): Promise<PaginatedResult<TiktokPost> | NoDataResult> {
     const args = this.buildArgs({
       query,
       fields: options.fields,
@@ -91,7 +92,7 @@ export class TiktokNamespace extends BaseNamespace {
       endDate?: string;
       forceLatest?: boolean;
     } = {}
-  ): Promise<PaginatedResult<TiktokComment>> {
+  ): Promise<PaginatedResult<TiktokComment> | NoDataResult> {
     const args = this.buildArgs({ postId, ...options });
     const result = await this.callAndMaybePoll(tools.GET_TIKTOK_COMMENTS, args);
     return this.buildPaginatedResult(result, parseComment, tools.GET_TIKTOK_COMMENTS, args);
@@ -133,7 +134,7 @@ export class TiktokNamespace extends BaseNamespace {
       responseType?: ResponseType;
       limit?: number;
     } = {}
-  ): Promise<PaginatedResult<TiktokUser>> {
+  ): Promise<PaginatedResult<TiktokUser> | NoDataResult> {
     const args = this.buildArgs({ query, ...options });
     const result = await this.callAndMaybePoll(tools.GET_TIKTOK_USERS_BY_KEYWORDS, args);
     return this.buildPaginatedResult(

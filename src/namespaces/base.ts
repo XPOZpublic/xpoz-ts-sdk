@@ -1,5 +1,6 @@
-import { waitForResult } from "../mcp/polling.js";
+import { interpretStatus, waitForResult } from "../mcp/polling.js";
 import { PaginatedResult } from "../pagination.js";
+import { NoDataResult } from "../results.js";
 import type { PaginationInfo } from "../types/common.js";
 import { DEFAULT_TIMEOUT_MS } from "../config/constants.js";
 
@@ -44,8 +45,9 @@ export class BaseNamespace {
   ): Promise<RawDict> {
     const result = await this.callTool(toolName, args);
 
-    if ("results" in result) {
-      return result;
+    const terminal = interpretStatus(result);
+    if (terminal !== null) {
+      return terminal;
     }
 
     const operationId = result["operationId"] as string | undefined;
@@ -61,7 +63,13 @@ export class BaseNamespace {
     parseItem: (item: RawDict) => T,
     toolName: string,
     baseArgs: RawDict
-  ): PaginatedResult<T> {
+  ): PaginatedResult<T> | NoDataResult {
+    if (raw["status"] === "no_data") {
+      return new NoDataResult(
+        typeof raw["message"] === "string" ? raw["message"] : ""
+      );
+    }
+
     const items = extractResults(raw).map(parseItem);
     const pagination = extractPagination(raw);
     const tableName = pagination.tableName;
@@ -70,7 +78,7 @@ export class BaseNamespace {
     const fetchPage = async (
       pageNumber: number,
       tbl: string | null | undefined
-    ): Promise<PaginatedResult<T>> => {
+    ): Promise<PaginatedResult<T> | NoDataResult> => {
       const args: RawDict = { ...baseArgs, pageNumber };
       if (tbl) args["tableName"] = tbl;
       const pageRaw = await this.callAndMaybePoll(toolName, args);

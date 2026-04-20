@@ -31,23 +31,38 @@ export class OperationTimeoutError extends XpozError {
   }
 }
 
-export class OperationFailedError extends XpozError {
-  operationId: string;
-  operationError: string;
+export interface OperationFailedErrorParams {
+  error: string;
+  operationId?: string;
+  message?: string;
+  category?: string;
+}
 
-  constructor(operationId: string, error: string) {
-    super(`Operation ${operationId} failed: ${error}`);
+export class OperationFailedError extends XpozError {
+  operationId?: string;
+  operationError: string;
+  errorMessage?: string;
+  category?: string;
+
+  constructor(params: OperationFailedErrorParams) {
+    const prefix = params.operationId
+      ? `Operation ${params.operationId}`
+      : "Operation";
+    super(`${prefix} failed: ${params.error}`);
     this.name = "OperationFailedError";
-    this.operationId = operationId;
-    this.operationError = error;
+    this.operationId = params.operationId;
+    this.operationError = params.error;
+    this.errorMessage = params.message;
+    this.category = params.category;
   }
 }
 
 export class OperationCancelledError extends XpozError {
-  operationId: string;
+  operationId?: string;
 
-  constructor(operationId: string) {
-    super(`Operation ${operationId} was cancelled`);
+  constructor(operationId?: string) {
+    const target = operationId ? `Operation ${operationId}` : "Operation";
+    super(`${target} was cancelled`);
     this.name = "OperationCancelledError";
     this.operationId = operationId;
   }
