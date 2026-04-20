@@ -11,7 +11,7 @@ export const RESPONSE_STATUS = {
   SUCCESS: "success",
   ERROR: "error",
   NO_DATA: "no_data",
-  IN_PROGRESS: "in_progress",
+  RUNNING: "running",
   CANCELLED: "cancelled",
 } as const;
 

@@ -100,14 +100,14 @@ describe("interpretStatus", () => {
     expect(interpretStatus(raw)).toBe(raw);
   });
 
-  it("returns null on status=in_progress", () => {
+  it("returns null on status=running", () => {
     expect(
-      interpretStatus({ status: RESPONSE_STATUS.IN_PROGRESS, progress: 0.5 })
+      interpretStatus({ status: RESPONSE_STATUS.RUNNING, progress: 0.5 })
     ).toBeNull();
   });
 
   it("returns null on unknown status", () => {
-    expect(interpretStatus({ status: "running" })).toBeNull();
+    expect(interpretStatus({ status: "pending" })).toBeNull();
   });
 });
 
@@ -130,8 +130,8 @@ describe("waitForResult", () => {
   it("polls until success", async () => {
     vi.useFakeTimers();
     const { callTool, calls } = stubCallTool([
-      { status: "in_progress" },
-      { status: "in_progress" },
+      { status: "running" },
+      { status: "running" },
       { status: "success", results: [{ id: 1 }] },
     ]);
     const promise = waitForResult(callTool, "op_xxx", 60_000);
@@ -161,8 +161,8 @@ describe("waitForResult", () => {
   it("throws OperationTimeoutError when elapsed exceeds timeout", async () => {
     vi.useFakeTimers();
     const { callTool } = stubCallTool([
-      { status: "in_progress" },
-      { status: "in_progress" },
+      { status: "running" },
+      { status: "running" },
     ]);
     const caught = waitForResult(callTool, "op_xxx", 1_000).catch(
       (e: unknown) => e
@@ -236,8 +236,8 @@ describe("callAndMaybePoll (sync response path)", () => {
   it("polls async operation and returns eventual result", async () => {
     vi.useFakeTimers();
     const { callTool, calls } = stubCallTool([
-      { operationId: "op_xxx", status: "in_progress" },
-      { status: "in_progress" },
+      { operationId: "op_xxx", status: "running" },
+      { status: "running" },
       { status: "success", results: [{ id: 42 }] },
     ]);
     const ns = new TestNamespace(callTool, 60_000);
