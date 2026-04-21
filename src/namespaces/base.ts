@@ -2,6 +2,7 @@ import { waitForResult } from "../mcp/polling.js";
 import { PaginatedResult } from "../pagination.js";
 import type { PaginationInfo } from "../types/common.js";
 import { DEFAULT_TIMEOUT_MS } from "../config/constants.js";
+import { OperationFailedError } from "../errors.js";
 
 type CallTool = (
   name: string,
@@ -44,7 +45,15 @@ export class BaseNamespace {
   ): Promise<RawDict> {
     const result = await this.callTool(toolName, args);
 
-    if ("results" in result) {
+    // if receiving error in first call it is a sync call.
+    if (result["status"] === "error") {
+      throw new OperationFailedError(
+        "",
+        String(result["error"] ?? "Unknown error")
+      );
+    }
+
+    if (result["status"] === "success" || "results" in result) {
       return result;
     }
 

@@ -18,7 +18,7 @@ export async function waitForResult(
     const result = await callTool("checkOperationStatus", { operationId });
     const status = result["status"];
 
-    if (status === "failed") {
+    if (status === "error") {
       const error = result["error"] ?? "Unknown error";
       throw new OperationFailedError(operationId, String(error));
     }
@@ -28,7 +28,7 @@ export async function waitForResult(
     }
 
     if (
-      status === "completed" ||
+      status === "success" ||
       status === "no_data" ||
       "results" in result ||
       "downloadUrl" in result
