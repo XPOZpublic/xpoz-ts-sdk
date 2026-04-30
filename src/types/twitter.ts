@@ -6,11 +6,15 @@ export interface TwitterPost {
   conversationId?: string | null;
   lang?: string | null;
   source?: string | null;
-  status?: string | null;
   deleted?: boolean | null;
   suspended?: boolean | null;
   possiblySensitive?: boolean | null;
   isRetweet?: boolean | null;
+  hasBirdwatchNotes?: boolean | null;
+  birdwatchNotesId?: string | null;
+  birdwatchNotesText?: string | null;
+  birdwatchNotesUrl?: string | null;
+  status?: string | null;
 
   likeCount?: number | null;
   retweetCount?: number | null;
@@ -26,26 +30,19 @@ export interface TwitterPost {
   replyToUsername?: string | null;
   originalTweetId?: string | null;
   editedTweets?: string[] | null;
-  replySettings?: string | null;
 
   hashtags?: string[] | null;
   mentions?: string[] | null;
   mediaUrls?: string[] | null;
-  grokGeneratedContent?: Record<string, unknown>[] | null;
   urls?: string[] | null;
+  grokGeneratedContent?: Record<string, unknown>[] | null;
 
   country?: string | null;
   region?: string | null;
   city?: string | null;
 
-  hasBirdwatchNotes?: boolean | null;
-  birdwatchNotesId?: string | null;
-  birdwatchNotesText?: string | null;
-  birdwatchNotesUrl?: string | null;
-
   createdAt?: string | null;
   createdAtDate?: string | null;
-  xFetchedAt?: string | null;
 
   [key: string]: unknown;
 }
@@ -98,7 +95,6 @@ export interface TwitterUser {
   lastUsernameChangeDatetime?: string | null;
 
   createdAt?: string | null;
-  createdAtDate?: string | null;
   xFetchedAt?: string | null;
   modifiedAt?: string | null;
   xModifiedAt?: string | null;
