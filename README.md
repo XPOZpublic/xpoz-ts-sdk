@@ -714,15 +714,20 @@ All fields are optional and typed as their respective TypeScript types. Unknown 
 | `hashtags`          | `string[]` | Hashtags in tweet          |
 | `mentions`          | `string[]` | Mentioned usernames        |
 | `mediaUrls`         | `string[]` | Media attachment URLs      |
-| `urls`              | `string[]` | URLs in tweet              |
+| `urls`              | `string[]` | URLs in tweet text         |
 | `country`           | `string`   | Country (if geo-tagged)    |
 | `createdAt`         | `string`   | Creation timestamp         |
 | `createdAtDate`     | `string`   | Creation date (YYYY-MM-DD) |
 | `conversationId`    | `string`   | Thread conversation ID     |
 | `quotedTweetId`     | `string`   | ID of quoted tweet         |
 | `replyToTweetId`    | `string`   | ID of parent tweet         |
-| `isRetweet`         | `boolean`  | Whether this is a retweet  |
 | `possiblySensitive` | `boolean`  | Sensitive content flag     |
+| `isRetweet`         | `boolean`  | Whether this is a retweet  |
+| `hasBirdwatchNotes` | `boolean`  | Has community notes        |
+| `birdwatchNotesId`  | `string`   | Birdwatch note ID          |
+| `birdwatchNotesText`| `string`   | Birdwatch note text        |
+| `birdwatchNotesUrl` | `string`   | Birdwatch note URL         |
+| `status`            | `string`   | Tweet status               |
 
 ### TwitterUser
 
@@ -760,8 +765,10 @@ All fields are optional and typed as their respective TypeScript types. Unknown 
 | `videoPlayCount` | `number` | Video play count           |
 | `mediaType`      | `string` | Media type                 |
 | `imageUrl`       | `string` | Image URL                  |
-| `videoUrl`       | `string` | Video URL                  |
-| `createdAtDate`  | `string` | Creation date              |
+| `videoUrl`                          | `string`  | Video URL                         |
+| `createdAtDate`                     | `string`  | Creation date                     |
+| `genAiChatWithAiCtaInfo`            | `string`  | Gen AI chat CTA info              |
+| `hasHighRiskGenAiInformTreatment`   | `boolean` | High risk Gen AI treatment flag   |
 
 ### InstagramUser
 

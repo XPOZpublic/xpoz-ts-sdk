@@ -20,12 +20,6 @@ export interface TiktokPost {
   lastFetch?: string | null;
   lastFetchDatetime?: string | null;
   xLastUpdated?: string | null;
-  aggRelevance?: number | null;
-  relevantPostsCount?: number | null;
-  relevantPostsLikesSum?: number | null;
-  relevantPostsCommentsSum?: number | null;
-  relevantPostsPlaysSum?: number | null;
-  relevantPostsForwardsSum?: number | null;
   [key: string]: unknown;
 }
 

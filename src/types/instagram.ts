@@ -23,6 +23,8 @@ export interface InstagramPost {
   videoPlayCount?: number | null;
 
   location?: string | null;
+  genAiChatWithAiCtaInfo?: string | null;
+  hasHighRiskGenAiInformTreatment?: boolean | null;
 
   createdAt?: string | null;
   createdAtTimestamp?: number | null;
