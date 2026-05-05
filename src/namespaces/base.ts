@@ -53,7 +53,7 @@ export class BaseNamespace {
       );
     }
 
-    if (result["status"] === "success" || "results" in result) {
+    if (result["status"] === "success" || result["status"] === "no_data" || "results" in result) {
       return result;
     }
 
