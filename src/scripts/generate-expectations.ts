@@ -4,7 +4,8 @@ import { fileURLToPath } from 'url';
 import * as tools from '../config/tools.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const typesDir = resolve(__dirname, '..', 'types');
+const repoRoot = resolve(__dirname, '..', '..');
+const typesDir = resolve(repoRoot, 'src', 'types');
 
 function extractInterfaceFields(filePath: string): Record<string, string[]> {
   const content = readFileSync(filePath, 'utf-8');
