@@ -77,27 +77,15 @@ export interface TwitterUser {
   label?: string | null;
   labelType?: string | null;
 
-  collectedFollowingCount?: number | null;
-  collectedFollowersCount?: number | null;
-  collectedFollowersCoverage?: number | null;
-  collectedFollowingCoverage?: number | null;
-  avgTweetsPerDayLastMonth?: number | null;
-
   nLang?: number | null;
   nLangsFiltered?: number | null;
-  inauthenticType?: string | null;
-  isInauthentic?: boolean | null;
-  isInauthenticProbScore?: number | null;
-  isInauthenticCalculatedAt?: string | null;
 
   verifiedSinceDatetime?: string | null;
   usernameChanges?: string[] | null;
   lastUsernameChangeDatetime?: string | null;
 
   createdAt?: string | null;
-  xFetchedAt?: string | null;
   modifiedAt?: string | null;
-  xModifiedAt?: string | null;
 
   aggRelevance?: number | null;
   relevantTweetsCount?: number | null;

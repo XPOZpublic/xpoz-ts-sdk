@@ -17,9 +17,6 @@ export interface TiktokPost {
   createdAt?: string | null;
   createdAtTimestamp?: number | null;
   createdAtDate?: string | null;
-  lastFetch?: string | null;
-  lastFetchDatetime?: string | null;
-  xLastUpdated?: string | null;
   [key: string]: unknown;
 }
 
@@ -40,9 +37,6 @@ export interface TiktokUser {
   region?: string | null;
   createdAt?: string | null;
   usernameModifyTime?: string | null;
-  lastFetch?: string | null;
-  lastFetchDatetime?: string | null;
-  xLastUpdated?: string | null;
   aggRelevance?: number | null;
   relevantPostsCount?: number | null;
   relevantPostsLikesSum?: number | null;
@@ -62,8 +56,5 @@ export interface TiktokComment {
   createdAt?: string | null;
   createdAtTimestamp?: number | null;
   createdAtDate?: string | null;
-  lastFetch?: string | null;
-  lastFetchDatetime?: string | null;
-  xLastUpdated?: string | null;
   [key: string]: unknown;
 }
