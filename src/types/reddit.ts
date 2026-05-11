@@ -39,9 +39,6 @@ export interface RedditPost {
   createdAt?: string | null;
   createdAtTimestamp?: number | null;
   createdAtDate?: string | null;
-  lastFetch?: string | null;
-  lastFetchDatetime?: string | null;
-  xLastUpdated?: string | null;
 
   [key: string]: unknown;
 }
@@ -78,9 +75,6 @@ export interface RedditUser {
   createdAt?: string | null;
   createdAtTimestamp?: number | null;
   createdAtDate?: string | null;
-  lastFetch?: string | null;
-  lastFetchDatetime?: string | null;
-  xLastUpdated?: string | null;
 
   aggRelevance?: number | null;
   relevantPostsCount?: number | null;
@@ -117,9 +111,6 @@ export interface RedditComment {
   createdAt?: string | null;
   createdAtTimestamp?: number | null;
   createdAtDate?: string | null;
-  lastFetch?: string | null;
-  lastFetchDatetime?: string | null;
-  xLastUpdated?: string | null;
 
   [key: string]: unknown;
 }
@@ -148,9 +139,6 @@ export interface RedditSubreddit {
   createdAt?: string | null;
   createdAtTimestamp?: number | null;
   createdAtDate?: string | null;
-  lastFetch?: string | null;
-  lastFetchDatetime?: string | null;
-  xLastUpdated?: string | null;
 
   aggRelevance?: number | null;
   relevantPostsCount?: number | null;

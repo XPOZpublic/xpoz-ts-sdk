@@ -29,9 +29,6 @@ export interface InstagramPost {
   createdAt?: string | null;
   createdAtTimestamp?: number | null;
   createdAtDate?: string | null;
-  lastFetch?: string | null;
-  lastFetchDatetime?: string | null;
-  xLastUpdated?: string | null;
 
   [key: string]: unknown;
 }
@@ -53,10 +50,6 @@ export interface InstagramUser {
   profileUrl?: string | null;
   externalUrl?: string | null;
   hasAnonymousProfilePicture?: boolean | null;
-
-  lastFetch?: string | null;
-  lastFetchDatetime?: string | null;
-  xLastUpdated?: string | null;
 
   aggRelevance?: number | null;
   relevantPostsCount?: number | null;
@@ -90,9 +83,6 @@ export interface InstagramComment {
   createdAt?: string | null;
   createdAtTimestamp?: number | null;
   createdAtDate?: string | null;
-  lastFetch?: string | null;
-  lastFetchDatetime?: string | null;
-  xLastUpdated?: string | null;
 
   [key: string]: unknown;
 }

@@ -747,9 +747,6 @@ All fields are optional and typed as their respective TypeScript types. Unknown 
 | `profileImageUrl`            | `string`  | Profile picture URL        |
 | `createdAt`                  | `string`  | Account creation timestamp |
 | `accountBasedIn`             | `string`  | Account location           |
-| `isInauthentic`              | `boolean` | Inauthenticity flag        |
-| `isInauthenticProbScore`     | `number`  | Inauthenticity probability |
-| `avgTweetsPerDayLastMonth`   | `number`  | Tweeting frequency         |
 
 ### InstagramPost
 
