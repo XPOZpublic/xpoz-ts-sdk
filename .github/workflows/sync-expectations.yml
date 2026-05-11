@@ -20,10 +20,10 @@ jobs:
           cache: 'npm'
 
       - run: npm ci
-      - run: npm run build
+      - run: npm run build:scripts
 
       - name: Generate expectations
-        run: node dist/scripts/generate-expectations.js > /tmp/ts-expectations.json
+        run: npm run --silent generate-expectations > /tmp/ts-expectations.json
 
       - name: Checkout xpoz-mcp
         uses: actions/checkout@v4

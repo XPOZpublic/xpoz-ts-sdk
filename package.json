@@ -18,6 +18,8 @@
   ],
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "build:scripts": "tsup src/scripts/generate-expectations.ts --format esm --out-dir dist/scripts",
+    "generate-expectations": "node dist/scripts/generate-expectations.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "prepublishOnly": "npm run build"
