@@ -35,10 +35,12 @@ export const GET_REDDIT_SUBREDDITS_BY_KEYWORDS = "getRedditSubredditsByKeywords"
 export const GET_TIKTOK_POSTS_BY_IDS = "getTiktokPostsByIds";
 export const GET_TIKTOK_POSTS_BY_USER = "getTiktokPostsByUser";
 export const SEARCH_TIKTOK_POSTS = "getTiktokPostsByKeywords";
+export const GET_TIKTOK_POSTS_BY_HASHTAGS = "getTiktokPostsByHashtags";
 export const GET_TIKTOK_COMMENTS = "getTiktokCommentsByPostId";
 export const GET_TIKTOK_USER = "getTiktokUser";
 export const SEARCH_TIKTOK_USERS = "searchTiktokUsers";
 export const GET_TIKTOK_USERS_BY_KEYWORDS = "getTiktokUsersByKeywords";
+export const GET_TIKTOK_USERS_BY_HASHTAGS = "getTiktokUsersByHashtags";
 
 export const GET_TRACKED_ITEMS = "getTrackedItems";
 export const ADD_TRACKED_ITEMS = "addTrackedItems";
