@@ -200,7 +200,7 @@ The following methods accept both `responseType` and `limit`:
 - `twitter.getPostsByAuthor()`, `twitter.searchPosts()`, `twitter.getUsersByKeywords()`
 - `instagram.getPostsByUser()`, `instagram.searchPosts()`, `instagram.getUsersByKeywords()`
 - `reddit.searchPosts()`
-- `tiktok.getPostsByUser()`, `tiktok.searchPosts()`, `tiktok.getUsersByKeywords()`
+- `tiktok.getPostsByUser()`, `tiktok.searchPosts()`, `tiktok.getUsersByKeywords()`, `tiktok.getPostsByHashtags()`, `tiktok.getUsersByHashtags()`
 
 These methods accept `limit` only:
 
@@ -640,6 +640,28 @@ const results = await client.tiktok.searchPosts("travel vlog", {
 });
 ```
 
+#### `getPostsByHashtags(hashtags, options?) -> Promise<PaginatedResult<TiktokPost>>`
+
+Search posts by hashtags via the indexed `hashtags` column. Pass bare alphanumeric tags (no leading `#`). Max 5 hashtags per request; OR semantics across the list.
+
+```typescript
+const results = await client.tiktok.getPostsByHashtags(["dance", "fyp"], {
+  responseType: ResponseType.Fast,
+  limit: 50,
+});
+```
+
+#### `getUsersByHashtags(hashtags, options?) -> Promise<PaginatedResult<TiktokUser>>`
+
+Find users who authored posts tagged with the given hashtags. Same input rules as `getPostsByHashtags`.
+
+```typescript
+const users = await client.tiktok.getUsersByHashtags(["sustainable_fashion"], {
+  responseType: ResponseType.Fast,
+  limit: 20,
+});
+```
+
 #### `getComments(postId, options?) -> Promise<PaginatedResult<TiktokComment>>`
 
 ```typescript
@@ -870,6 +892,9 @@ All fields are optional and typed as their respective TypeScript types. Unknown 
 | `downloadCount`              | `number`  | Number of downloads          |
 | `forwardCount`               | `number`  | Number of forwards/shares    |
 | `videoThumbnail`             | `string`  | Thumbnail URL                |
+| `videoUrl`                   | `string[]` | Array of video URLs         |
+| `duration`                   | `number`  | Video duration in seconds    |
+| `hashtags`                   | `string[]` | Hashtags in the post        |
 | `postType`                   | `number`  | Post type code               |
 | `isPrivate`                  | `boolean` | Private post flag            |
 | `createdAt`                  | `string`  | Creation timestamp           |

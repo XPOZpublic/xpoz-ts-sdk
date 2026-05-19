@@ -14,6 +14,9 @@ export interface TiktokPost {
   downloadCount?: number | null;
   forwardCount?: number | null;
   playCount?: number | null;
+  hashtags?: string[] | null;
+  duration?: number | null;
+  videoUrl?: string[] | null;
   createdAt?: string | null;
   createdAtTimestamp?: number | null;
   createdAtDate?: string | null;

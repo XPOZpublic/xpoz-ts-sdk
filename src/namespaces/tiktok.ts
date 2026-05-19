@@ -143,4 +143,46 @@ export class TiktokNamespace extends BaseNamespace {
       args
     );
   }
+
+  async getPostsByHashtags(
+    hashtags: string[],
+    options: {
+      fields?: string[];
+      startDate?: string;
+      endDate?: string;
+      forceLatest?: boolean;
+      responseType?: ResponseType;
+      limit?: number;
+    } = {}
+  ): Promise<PaginatedResult<TiktokPost>> {
+    const args = this.buildArgs({ hashtags, ...options });
+    const result = await this.callAndMaybePoll(tools.GET_TIKTOK_POSTS_BY_HASHTAGS, args);
+    return this.buildPaginatedResult(
+      result,
+      parsePost,
+      tools.GET_TIKTOK_POSTS_BY_HASHTAGS,
+      args
+    );
+  }
+
+  async getUsersByHashtags(
+    hashtags: string[],
+    options: {
+      fields?: string[];
+      startDate?: string;
+      endDate?: string;
+      forceLatest?: boolean;
+      responseType?: ResponseType;
+      limit?: number;
+    } = {}
+  ): Promise<PaginatedResult<TiktokUser>> {
+    const args = this.buildArgs({ hashtags, ...options });
+    const result = await this.callAndMaybePoll(tools.GET_TIKTOK_USERS_BY_HASHTAGS, args);
+    return this.buildPaginatedResult(
+      result,
+      parseUser,
+      tools.GET_TIKTOK_USERS_BY_HASHTAGS,
+      args
+    );
+  }
 }
