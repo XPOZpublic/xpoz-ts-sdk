@@ -109,7 +109,8 @@ describe("TwitterUsers", () => {
     if (!hasClient()) return;
     const result = await client.twitter.getUserConnections(
       "elonmusk",
-      "followers"
+      "followers",
+      { responseType: ResponseType.Paging }
     );
     expect(result).toBeInstanceOf(PaginatedResult);
     expect(result.pagination.totalRows).toBeGreaterThan(0);

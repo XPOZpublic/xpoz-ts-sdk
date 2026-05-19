@@ -256,7 +256,12 @@ export class TwitterNamespace extends BaseNamespace {
   async getUserConnections(
     username: string,
     connectionType: string,
-    options: { fields?: string[]; forceLatest?: boolean } = {}
+    options: {
+      fields?: string[];
+      forceLatest?: boolean;
+      responseType?: ResponseType;
+      limit?: number;
+    } = {}
   ): Promise<PaginatedResult<TwitterUser>> {
     const args = this.buildArgs({ username, connectionType, ...options });
     const result = await this.callAndMaybePoll(
