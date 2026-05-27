@@ -25,3 +25,5 @@ export type {
 export type { TiktokPost, TiktokUser, TiktokComment } from "./types/tiktok.js";
 export { TrackedItemType, TrackedItemPlatform } from "./types/tracking.js";
 export type { TrackedItem, AddTrackedItemsResult, RemoveTrackedItemsResult } from "./types/tracking.js";
+export { BillingPeriod, CreditResetFrequency } from "./types/account.js";
+export type { AccountDetails, AccountBilling, AccountUsage, PlanFeatures } from "./types/account.js";

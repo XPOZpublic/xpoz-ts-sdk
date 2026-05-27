@@ -6,6 +6,7 @@ import { InstagramNamespace } from "./namespaces/instagram.js";
 import { RedditNamespace } from "./namespaces/reddit.js";
 import { TiktokNamespace } from "./namespaces/tiktok.js";
 import { TrackingNamespace } from "./namespaces/tracking.js";
+import { AccountNamespace } from "./namespaces/account.js";
 import { checkForUpdates } from "./versionCheck.js";
 
 export class XpozClient {
@@ -14,6 +15,7 @@ export class XpozClient {
   reddit: RedditNamespace;
   tiktok: TiktokNamespace;
   tracking: TrackingNamespace;
+  account: AccountNamespace;
 
   private transport: McpTransport;
   private versionCheck: boolean;
@@ -46,6 +48,7 @@ export class XpozClient {
     this.reddit = new RedditNamespace(callTool, timeoutMs);
     this.tiktok = new TiktokNamespace(callTool, timeoutMs);
     this.tracking = new TrackingNamespace(callTool, timeoutMs);
+    this.account = new AccountNamespace(callTool, timeoutMs);
   }
 
   async connect(): Promise<void> {

@@ -45,3 +45,5 @@ export const GET_TIKTOK_USERS_BY_HASHTAGS = "getTiktokUsersByHashtags";
 export const GET_TRACKED_ITEMS = "getTrackedItems";
 export const ADD_TRACKED_ITEMS = "addTrackedItems";
 export const REMOVE_TRACKED_ITEMS = "removeTrackedItems";
+
+export const GET_ACCOUNT_DETAILS = "getAccountDetails";
