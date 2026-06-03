@@ -2,6 +2,7 @@ export enum TrackedItemType {
   Keyword = "keyword",
   User = "user",
   Subreddit = "subreddit",
+  Hashtag = "hashtag",
 }
 
 export enum TrackedItemPlatform {
