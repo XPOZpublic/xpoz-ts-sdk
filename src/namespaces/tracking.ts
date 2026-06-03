@@ -9,7 +9,7 @@ import * as tools from "../config/tools.js";
 export class TrackingNamespace extends BaseNamespace {
   async getTrackedItems(): Promise<TrackedItem[]> {
     const result = await this.callTool(tools.GET_TRACKED_ITEMS, {});
-    return (result["data"] as TrackedItem[]) ?? [];
+    return (result["results"] as TrackedItem[]) ?? [];
   }
 
   async addTrackedItems(
