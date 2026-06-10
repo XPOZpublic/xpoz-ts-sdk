@@ -99,12 +99,13 @@ export class TiktokNamespace extends BaseNamespace {
 
   async getUser(
     identifier: string,
-    options: { identifierType?: string; fields?: string[] } = {}
+    options: { identifierType?: string; fields?: string[]; forceLatest?: boolean } = {}
   ): Promise<TiktokUser> {
     const args = this.buildArgs({
       identifier,
       identifierType: options.identifierType ?? "username",
       fields: options.fields,
+      forceLatest: options.forceLatest,
     });
     const result = await this.callAndMaybePoll(tools.GET_TIKTOK_USER, args);
     const results = result["results"];

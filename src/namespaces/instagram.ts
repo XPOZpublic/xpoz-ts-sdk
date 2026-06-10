@@ -99,12 +99,13 @@ export class InstagramNamespace extends BaseNamespace {
 
   async getUser(
     identifier: string,
-    options: { identifierType?: string; fields?: string[] } = {}
+    options: { identifierType?: string; fields?: string[]; forceLatest?: boolean } = {}
   ): Promise<InstagramUser> {
     const args = this.buildArgs({
       identifier,
       identifierType: options.identifierType ?? "username",
       fields: options.fields,
+      forceLatest: options.forceLatest,
     });
     const result = await this.callAndMaybePoll(tools.GET_INSTAGRAM_USER, args);
     const results = result["results"];

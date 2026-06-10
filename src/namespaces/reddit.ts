@@ -78,7 +78,7 @@ export class RedditNamespace extends BaseNamespace {
 
   async getUser(
     username: string,
-    options: { fields?: string[] } = {}
+    options: { fields?: string[]; forceLatest?: boolean } = {}
   ): Promise<RedditUser> {
     const args = this.buildArgs({ username, ...options });
     const result = await this.callAndMaybePoll(tools.GET_REDDIT_USER, args);
