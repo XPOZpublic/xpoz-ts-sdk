@@ -17,6 +17,7 @@ export interface TiktokPost {
   hashtags?: string[] | null;
   duration?: number | null;
   videoUrl?: string[] | null;
+  transcriptsJson?: Record<string, string> | null;
   createdAt?: string | null;
   createdAtTimestamp?: number | null;
   createdAtDate?: string | null;
