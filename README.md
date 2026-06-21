@@ -81,12 +81,19 @@ const client = new XpozClient({ apiKey: "your-api-key", timeoutMs: 600_000 });
 
 ### Trial Access (No Sign-Up Required)
 
-Want to try the SDK before signing up? Use the public trial token as your API key:
+Want to try the SDK before signing up? Mint a free trial token (no account needed, valid for 5 days):
+
+```bash
+curl -X POST https://api.xpoz.ai/api/trial/token
+# -> { "success": true, "data": { "accessKey": "TRIAL...", "expiresInSeconds": 432000 }, ... }
+```
+
+Then use the returned token (it starts with `TRIAL`) as your API key:
 
 ```typescript
 // Optional: try without your own account
 const client = new XpozClient({
-  apiKey: "K3FG1WG8Hzxd5aAXG1fIpcb1KjArTNQMmh1vFpjd4g8ER6ecrSRkRs3LqlnMaNTZoy7MFT9",
+  apiKey: "TRIAL...", // the token from the curl response above
 });
 await client.connect();
 
