@@ -47,3 +47,4 @@ export const ADD_TRACKED_ITEMS = "addTrackedItems";
 export const REMOVE_TRACKED_ITEMS = "removeTrackedItems";
 
 export const GET_ACCOUNT_DETAILS = "getAccountDetails";
+export const GET_CREDITS_USAGE_HISTORY = "getCreditsUsageHistory";
