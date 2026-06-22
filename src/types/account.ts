@@ -38,3 +38,19 @@ export interface AccountDetails {
   billing: AccountBilling | null;
   usage: AccountUsage;
 }
+
+export interface UsageHistoryBucket {
+  bucket: string;
+  subscriptionUsed: number;
+  extraUsed: number;
+  totalUsed: number;
+  extraPurchased: number;
+}
+
+export interface CreditsUsageHistory {
+  range: string;
+  granularity: string;
+  generatedAt: string;
+  credits: UsageHistoryBucket[];
+  exportRows: UsageHistoryBucket[];
+}
