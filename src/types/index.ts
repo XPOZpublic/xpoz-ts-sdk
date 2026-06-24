@@ -9,7 +9,7 @@ export type {
   RedditPostWithComments,
   SubredditWithPosts,
 } from "./reddit.js";
-export type { TiktokPost, TiktokUser, TiktokComment } from "./tiktok.js";
+export type { TiktokPost, TiktokUser, TiktokComment, TiktokSound } from "./tiktok.js";
 export { TrackedItemType, TrackedItemPlatform } from "./tracking.js";
 export type { TrackedItem, AddTrackedItemsResult, RemoveTrackedItemsResult } from "./tracking.js";
 export { BillingPeriod, CreditResetFrequency } from "./account.js";

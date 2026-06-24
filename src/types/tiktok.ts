@@ -62,3 +62,16 @@ export interface TiktokComment {
   createdAtDate?: string | null;
   [key: string]: unknown;
 }
+
+export interface TiktokSound {
+  id?: string | null;
+  title?: string | null;
+  author?: string | null;
+  album?: string | null;
+  duration?: number | null;
+  userCount?: number | null;
+  isOriginal?: boolean | null;
+  isCommerceMusic?: boolean | null;
+  isOriginalSound?: boolean | null;
+  [key: string]: unknown;
+}

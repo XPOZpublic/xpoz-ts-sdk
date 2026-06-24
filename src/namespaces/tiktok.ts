@@ -1,6 +1,6 @@
 import { BaseNamespace } from "./base.js";
 import { PaginatedResult } from "../pagination.js";
-import type { TiktokPost, TiktokUser, TiktokComment } from "../types/tiktok.js";
+import type { TiktokPost, TiktokUser, TiktokComment, TiktokSound } from "../types/tiktok.js";
 import * as tools from "../config/tools.js";
 import { ResponseType } from "../config/constants.js";
 
@@ -16,6 +16,10 @@ function parseUser(item: RawDict): TiktokUser {
 
 function parseComment(item: RawDict): TiktokComment {
   return item as TiktokComment;
+}
+
+function parseSound(item: RawDict): TiktokSound {
+  return item as TiktokSound;
 }
 
 export class TiktokNamespace extends BaseNamespace {
@@ -185,5 +189,30 @@ export class TiktokNamespace extends BaseNamespace {
       tools.GET_TIKTOK_USERS_BY_HASHTAGS,
       args
     );
+  }
+
+  async searchSounds(
+    keyword: string,
+    options: { limit?: number; fields?: string[] } = {}
+  ): Promise<TiktokSound[]> {
+    const args = this.buildArgs({ keyword, ...options });
+    const result = await this.callAndMaybePoll(tools.SEARCH_TIKTOK_SOUNDS, args);
+    return ((result["results"] as RawDict[]) ?? []).map(parseSound);
+  }
+
+  async getPostsBySound(
+    soundId: string,
+    options: {
+      fields?: string[];
+      startDate?: string;
+      endDate?: string;
+      forceLatest?: boolean;
+      responseType?: ResponseType;
+      limit?: number;
+    } = {}
+  ): Promise<PaginatedResult<TiktokPost>> {
+    const args = this.buildArgs({ soundId, ...options });
+    const result = await this.callAndMaybePoll(tools.GET_TIKTOK_POSTS_BY_SOUND, args);
+    return this.buildPaginatedResult(result, parsePost, tools.GET_TIKTOK_POSTS_BY_SOUND, args);
   }
 }
