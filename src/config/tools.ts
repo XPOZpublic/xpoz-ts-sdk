@@ -41,6 +41,8 @@ export const GET_TIKTOK_USER = "getTiktokUser";
 export const SEARCH_TIKTOK_USERS = "searchTiktokUsers";
 export const GET_TIKTOK_USERS_BY_KEYWORDS = "getTiktokUsersByKeywords";
 export const GET_TIKTOK_USERS_BY_HASHTAGS = "getTiktokUsersByHashtags";
+export const SEARCH_TIKTOK_SOUNDS = "searchTiktokSounds";
+export const GET_TIKTOK_POSTS_BY_SOUND = "getTiktokPostsBySound";
 
 export const GET_TRACKED_ITEMS = "getTrackedItems";
 export const ADD_TRACKED_ITEMS = "addTrackedItems";
