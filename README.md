@@ -30,7 +30,7 @@ The SDK wraps Xpoz's [MCP](https://modelcontextprotocol.io) server, abstracting 
 
 ## Features
 
-- **40 data methods** across Twitter, Instagram, Reddit, and TikTok
+- **42 data methods** across Twitter, Instagram, Reddit, and TikTok
 - **Fully async** — all methods return `Promise<T>`
 - **Automatic operation polling** — long-running queries are abstracted away
 - **Response types** — choose between fast (immediate), paging (full pagination), or CSV export
@@ -229,12 +229,12 @@ The following methods accept both `responseType` and `limit`:
 - `twitter.getPostsByAuthor()`, `twitter.searchPosts()`, `twitter.getUsersByKeywords()`
 - `instagram.getPostsByUser()`, `instagram.searchPosts()`, `instagram.getUsersByKeywords()`
 - `reddit.searchPosts()`
-- `tiktok.getPostsByUser()`, `tiktok.searchPosts()`, `tiktok.getUsersByKeywords()`, `tiktok.getPostsByHashtags()`, `tiktok.getUsersByHashtags()`
+- `tiktok.getPostsByUser()`, `tiktok.searchPosts()`, `tiktok.getUsersByKeywords()`, `tiktok.getPostsByHashtags()`, `tiktok.getUsersByHashtags()`, `tiktok.getPostsBySound()`
 
 These methods accept `limit` only:
 
 - `twitter.searchUsers()`, `instagram.searchUsers()`, `reddit.searchUsers()`, `reddit.searchSubreddits()`
-- `tiktok.searchUsers()`
+- `tiktok.searchUsers()`, `tiktok.searchSounds()`
 
 ## Query Syntax
 
@@ -691,6 +691,26 @@ const users = await client.tiktok.getUsersByHashtags(["sustainable_fashion"], {
 });
 ```
 
+#### `searchSounds(keyword, options?) -> Promise<TiktokSound[]>`
+
+Search sound/music objects by keyword (title or artist). Pass the returned `id` to `getPostsBySound`.
+
+```typescript
+const sounds = await client.tiktok.searchSounds("dance monkey");
+const soundId = sounds[0].id;
+```
+
+#### `getPostsBySound(soundId, options?) -> Promise<PaginatedResult<TiktokPost>>`
+
+Find posts that use a specific sound via the indexed `music_id` column. Pass a single numeric `soundId` from `searchSounds`.
+
+```typescript
+const results = await client.tiktok.getPostsBySound("7016548364456789012", {
+  responseType: ResponseType.Fast,
+  limit: 50,
+});
+```
+
 #### `getComments(postId, options?) -> Promise<PaginatedResult<TiktokComment>>`
 
 ```typescript
@@ -739,6 +759,32 @@ const result = await client.tracking.removeTrackedItems([
   { phrase: "bitcoin", type: TrackedItemType.Keyword, platform: TrackedItemPlatform.Twitter },
 ]);
 console.log(`Removed ${result.removedCount} items`);
+```
+
+---
+
+### Account — `client.account`
+
+Read-only account, plan, and usage information for the authenticated user.
+
+#### `getAccountDetails() -> Promise<AccountDetails>`
+
+Returns the plan (name + feature limits), billing (period + next renewal; `billing` is `null` on the Free plan), and current usage (remaining subscription/extra credits, extra tracked items).
+
+```typescript
+const details = await client.account.getAccountDetails();
+console.log(details.plan.name, details.usage.subscriptionCreditsRemaining);
+```
+
+#### `getCreditsUsageHistory(range?, granularity?) -> Promise<CreditsUsageHistory>`
+
+Returns time-series usage for credits and export rows. `range` is one of `"today"`, `"7d"`, `"current_month"` (default), `"lifetime"`; `granularity` is `"hour"` or `"day"` (default). For current remaining balances, use `getAccountDetails()`.
+
+```typescript
+const history = await client.account.getCreditsUsageHistory("7d", "day");
+for (const bucket of history.credits) {
+  console.log(bucket.bucket, bucket.totalUsed);
+}
 ```
 
 ---
@@ -961,6 +1007,80 @@ All fields are optional and typed as their respective TypeScript types. Unknown 
 | `likeCount`     | `number` | Number of likes          |
 | `createdAt`     | `string` | Creation timestamp       |
 | `createdAtDate` | `string` | Creation date (YYYY-MM-DD) |
+
+### TiktokSound
+
+| Field              | Type      | Description                       |
+| ------------------ | --------- | --------------------------------- |
+| `id`               | `string`  | Sound/music ID                    |
+| `title`            | `string`  | Sound title                       |
+| `author`           | `string`  | Sound artist/author               |
+| `album`            | `string`  | Album name                        |
+| `duration`         | `number`  | Duration in seconds               |
+| `userCount`        | `number`  | Number of posts using the sound   |
+| `isOriginal`       | `boolean` | Whether the sound is original     |
+| `isCommerceMusic`  | `boolean` | Whether the sound is commercial   |
+| `isOriginalSound`  | `boolean` | Whether it is an original sound   |
+
+### AccountDetails
+
+Returned by `getAccountDetails()`.
+
+| Field     | Type                                  | Description                          |
+| --------- | ------------------------------------- | ------------------------------------ |
+| `plan`    | `{ name: string; features: PlanFeatures }` | Plan name and feature limits    |
+| `billing` | `AccountBilling \| null`              | Billing info (`null` on Free plan)   |
+| `usage`   | `AccountUsage`                        | Current usage balances               |
+
+### PlanFeatures
+
+| Field                    | Type                   | Description                     |
+| ------------------------ | ---------------------- | ------------------------------- |
+| `credits`                | `number`               | Subscription credits per period |
+| `creditResetFrequency`   | `CreditResetFrequency` | `"monthly"` or `"never"`        |
+| `extraCreditPrice`       | `number`               | Price per extra credit          |
+| `trackedItems`           | `number`               | Tracked-item allowance          |
+| `csvRowExportLimit`      | `number`               | CSV row export limit            |
+| `extraCsvRowPrice`       | `number`               | Price per extra CSV row         |
+| `extraTrackedItemPrice`  | `number`               | Price per extra tracked item    |
+| `maxRowsPerExport`       | `number`               | Max rows per single export      |
+
+### AccountBilling
+
+| Field             | Type            | Description               |
+| ----------------- | --------------- | ------------------------- |
+| `billingPeriod`   | `BillingPeriod` | `"monthly"` or `"annual"` |
+| `nextRenewalDate` | `string \| null` | Next renewal date         |
+
+### AccountUsage
+
+| Field                          | Type     | Description                    |
+| ------------------------------ | -------- | ------------------------------ |
+| `subscriptionCreditsRemaining` | `number` | Subscription credits remaining |
+| `extraCreditsRemaining`        | `number` | Extra credits remaining        |
+| `extraTrackedItems`            | `number` | Extra tracked items purchased  |
+
+### CreditsUsageHistory
+
+Returned by `getCreditsUsageHistory()`.
+
+| Field         | Type                   | Description                         |
+| ------------- | ---------------------- | ----------------------------------- |
+| `range`       | `string`               | Requested range                     |
+| `granularity` | `string`               | Requested granularity               |
+| `generatedAt` | `string`               | Timestamp the report was generated  |
+| `credits`     | `UsageHistoryBucket[]` | Credit usage buckets over time      |
+| `exportRows`  | `UsageHistoryBucket[]` | Export-rows usage buckets over time |
+
+### UsageHistoryBucket
+
+| Field              | Type     | Description                           |
+| ------------------ | -------- | ------------------------------------- |
+| `bucket`           | `string` | Bucket timestamp (hour or day)        |
+| `subscriptionUsed` | `number` | Subscription units used in the bucket |
+| `extraUsed`        | `number` | Extra units used in the bucket        |
+| `totalUsed`        | `number` | Total units used in the bucket        |
+| `extraPurchased`   | `number` | Extra units purchased in the bucket   |
 
 ### TrackedItem
 
