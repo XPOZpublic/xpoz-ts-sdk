@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@xpoz/xpoz)](https://www.npmjs.com/package/@xpoz/xpoz)
 
-TypeScript SDK for the [Xpoz](https://xpoz.ai) social media intelligence platform. Query Twitter/X, Instagram, and Reddit data through a simple, typed interface.
+TypeScript SDK for the [Xpoz](https://xpoz.ai) social media intelligence platform. Query Twitter/X, Instagram, Reddit, and TikTok data through a simple, typed interface.
 
 ## Installation
 
@@ -24,7 +24,7 @@ export XPOZ_API_KEY=your-token-here
 
 ## What is Xpoz?
 
-Xpoz provides unified access to social media data across Twitter/X, Instagram, and Reddit. The platform indexes billions of posts, user profiles, and engagement metrics — making it possible to search, analyze, and export social media data at scale.
+Xpoz provides unified access to social media data across Twitter/X, Instagram, Reddit, and TikTok. The platform indexes billions of posts, user profiles, and engagement metrics — making it possible to search, analyze, and export social media data at scale.
 
 The SDK wraps Xpoz's [MCP](https://modelcontextprotocol.io) server, abstracting away transport, authentication, operation polling, and pagination into a clean developer-friendly API.
 
