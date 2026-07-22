@@ -807,6 +807,19 @@ for (const bucket of history.credits) {
 
 All fields are optional and typed as their respective TypeScript types. Unknown fields are preserved on the object.
 
+> **Date fields.** Post models expose up to three creation-time fields whose
+> runtime formats differ from what their names suggest:
+>
+> - `createdAt` — full ISO 8601 datetime on Twitter; epoch **seconds** on
+>   Reddit/Instagram/TikTok.
+> - `createdAtTimestamp` — full ISO 8601 datetime (Reddit/Instagram/TikTok;
+>   not returned for Twitter).
+> - `createdAtDate` — the creation **date only**, rendered as ISO midnight
+>   (`2026-07-20T00:00:00.000Z`); it carries no real time-of-day.
+>
+> Depending on response quoting, values can arrive as strings or numbers —
+> treat all three as `string | number`.
+
 ### TwitterPost
 
 | Field               | Type       | Description                |
@@ -827,8 +840,8 @@ All fields are optional and typed as their respective TypeScript types. Unknown 
 | `mediaUrls`         | `string[]` | Media attachment URLs      |
 | `urls`              | `string[]` | URLs in tweet text         |
 | `country`           | `string`   | Country (if geo-tagged)    |
-| `createdAt`         | `string`   | Creation timestamp         |
-| `createdAtDate`     | `string`   | Creation date (YYYY-MM-DD) |
+| `createdAt`         | `string \| number` | Creation datetime (ISO 8601) |
+| `createdAtDate`     | `string \| number` | Creation date (ISO midnight, no time-of-day) |
 | `conversationId`    | `string`   | Thread conversation ID     |
 | `quotedTweetId`     | `string`   | ID of quoted tweet         |
 | `replyToTweetId`    | `string`   | ID of parent tweet         |
@@ -874,7 +887,9 @@ All fields are optional and typed as their respective TypeScript types. Unknown 
 | `mediaType`      | `string` | Media type                 |
 | `imageUrl`       | `string` | Image URL                  |
 | `videoUrl`                          | `string`  | Video URL                         |
-| `createdAtDate`                     | `string`  | Creation date                     |
+| `createdAt`                         | `string \| number` | Creation time (epoch seconds)     |
+| `createdAtTimestamp`                | `string \| number` | Creation datetime (ISO 8601)      |
+| `createdAtDate`                     | `string \| number` | Creation date (ISO midnight, no time-of-day) |
 | `genAiChatWithAiCtaInfo`            | `string`  | Gen AI chat CTA info              |
 | `hasHighRiskGenAiInformTreatment`   | `boolean` | High risk Gen AI treatment flag   |
 
@@ -921,7 +936,9 @@ All fields are optional and typed as their respective TypeScript types. Unknown 
 | `permalink`      | `string`  | Reddit permalink      |
 | `isSelf`         | `boolean` | Self post (text only) |
 | `over18`         | `boolean` | NSFW flag             |
-| `createdAtDate`  | `string`  | Creation date         |
+| `createdAt`      | `string \| number` | Creation time (epoch seconds) |
+| `createdAtTimestamp` | `string \| number` | Creation datetime (ISO 8601) |
+| `createdAtDate`  | `string \| number` | Creation date (ISO midnight, no time-of-day) |
 
 ### RedditUser
 
@@ -986,8 +1003,9 @@ All fields are optional and typed as their respective TypeScript types. Unknown 
 | `hashtags`                   | `string[]` | Hashtags in the post        |
 | `postType`                   | `number`  | Post type code               |
 | `isPrivate`                  | `boolean` | Private post flag            |
-| `createdAt`                  | `string`  | Creation timestamp           |
-| `createdAtDate`              | `string`  | Creation date (YYYY-MM-DD)   |
+| `createdAt`                  | `string \| number` | Creation time (epoch seconds) |
+| `createdAtTimestamp`         | `string \| number` | Creation datetime (ISO 8601)  |
+| `createdAtDate`              | `string \| number` | Creation date (ISO midnight, no time-of-day) |
 
 ### TiktokUser
 

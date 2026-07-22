@@ -41,8 +41,8 @@ export interface TwitterPost {
   region?: string | null;
   city?: string | null;
 
-  createdAt?: string | null;
-  createdAtDate?: string | null;
+  createdAt?: string | number | null;
+  createdAtDate?: string | number | null;
 
   [key: string]: unknown;
 }
@@ -84,7 +84,7 @@ export interface TwitterUser {
   usernameChanges?: string[] | null;
   lastUsernameChangeDatetime?: string | null;
 
-  createdAt?: string | null;
+  createdAt?: string | number | null;
   modifiedAt?: string | null;
 
   aggRelevance?: number | null;

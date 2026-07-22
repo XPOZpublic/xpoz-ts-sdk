@@ -18,9 +18,9 @@ export interface TiktokPost {
   duration?: number | null;
   videoUrl?: string[] | null;
   transcriptsJson?: Record<string, string> | null;
-  createdAt?: string | null;
-  createdAtTimestamp?: number | null;
-  createdAtDate?: string | null;
+  createdAt?: string | number | null;
+  createdAtTimestamp?: string | number | null;
+  createdAtDate?: string | number | null;
   [key: string]: unknown;
 }
 
@@ -39,7 +39,7 @@ export interface TiktokUser {
   postCount?: number | null;
   language?: string | null;
   region?: string | null;
-  createdAt?: string | null;
+  createdAt?: string | number | null;
   usernameModifyTime?: string | null;
   aggRelevance?: number | null;
   relevantPostsCount?: number | null;
@@ -57,9 +57,9 @@ export interface TiktokComment {
   username?: string | null;
   text?: string | null;
   likeCount?: number | null;
-  createdAt?: string | null;
-  createdAtTimestamp?: number | null;
-  createdAtDate?: string | null;
+  createdAt?: string | number | null;
+  createdAtTimestamp?: string | number | null;
+  createdAtDate?: string | number | null;
   [key: string]: unknown;
 }
 
