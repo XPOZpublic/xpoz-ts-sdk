@@ -1,6 +1,13 @@
 import { McpTransport } from "./mcp/transport.js";
+import { ApiTransport } from "./api/transport.js";
 import { AuthenticationError } from "./errors.js";
-import { DEFAULT_SERVER_URL, DEFAULT_TIMEOUT_MS, ENV_API_KEY, ENV_SERVER_URL } from "./config/constants.js";
+import {
+  DEFAULT_API_URL,
+  DEFAULT_SERVER_URL,
+  DEFAULT_TIMEOUT_MS,
+  ENV_API_KEY,
+  ENV_SERVER_URL,
+} from "./config/constants.js";
 import { TwitterNamespace } from "./namespaces/twitter.js";
 import { InstagramNamespace } from "./namespaces/instagram.js";
 import { RedditNamespace } from "./namespaces/reddit.js";
@@ -8,6 +15,8 @@ import { TiktokNamespace } from "./namespaces/tiktok.js";
 import { TrackingNamespace } from "./namespaces/tracking.js";
 import { AccountNamespace } from "./namespaces/account.js";
 import { checkForUpdates } from "./versionCheck.js";
+
+export type TransportMode = "mcp" | "api";
 
 export class XpozClient {
   twitter: TwitterNamespace;
@@ -17,7 +26,7 @@ export class XpozClient {
   tracking: TrackingNamespace;
   account: AccountNamespace;
 
-  private transport: McpTransport;
+  private transport: McpTransport | ApiTransport;
   private versionCheck: boolean;
 
   constructor(options: {
@@ -25,6 +34,7 @@ export class XpozClient {
     serverUrl?: string;
     timeoutMs?: number;
     versionCheck?: boolean;
+    transport?: TransportMode;
   } = {}) {
     const apiKey = options.apiKey ?? process.env[ENV_API_KEY];
     if (!apiKey) {
@@ -36,11 +46,17 @@ export class XpozClient {
 
     this.versionCheck = options.versionCheck ?? true;
 
+    const transportMode = options.transport ?? "mcp";
     const serverUrl =
-      options.serverUrl ?? process.env[ENV_SERVER_URL] ?? DEFAULT_SERVER_URL;
+      options.serverUrl ??
+      process.env[ENV_SERVER_URL] ??
+      (transportMode === "api" ? DEFAULT_API_URL : DEFAULT_SERVER_URL);
     const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
-    this.transport = new McpTransport(serverUrl, apiKey);
+    this.transport =
+      transportMode === "api"
+        ? new ApiTransport(serverUrl, apiKey)
+        : new McpTransport(serverUrl, apiKey);
 
     const callTool = this.transport.callTool.bind(this.transport);
     this.twitter = new TwitterNamespace(callTool, timeoutMs);

@@ -52,3 +52,25 @@ export class OperationCancelledError extends XpozError {
     this.operationId = operationId;
   }
 }
+
+export class NotSupportedError extends XpozError {
+  constructor(feature: string) {
+    super(
+      `${feature} is not available in API beta mode (Twitter only). ` +
+        `Use the default MCP transport for full coverage.`
+    );
+    this.name = "NotSupportedError";
+  }
+}
+
+export class ApiRequestError extends XpozError {
+  status: number;
+  apiError: string;
+
+  constructor(status: number, apiError: string) {
+    super(`Xpoz API request failed (${status}): ${apiError}`);
+    this.name = "ApiRequestError";
+    this.status = status;
+    this.apiError = apiError;
+  }
+}

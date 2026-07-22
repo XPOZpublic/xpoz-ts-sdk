@@ -1,4 +1,5 @@
 export { XpozClient } from "./client.js";
+export type { TransportMode } from "./client.js";
 export { PaginatedResult } from "./pagination.js";
 export {
   XpozError,
@@ -7,6 +8,8 @@ export {
   OperationTimeoutError,
   OperationFailedError,
   OperationCancelledError,
+  NotSupportedError,
+  ApiRequestError,
 } from "./errors.js";
 export { VERSION } from "./version.js";
 export { checkForUpdates } from "./versionCheck.js";
