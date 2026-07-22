@@ -162,6 +162,7 @@ When xpoz-mcp adds new fields or tools, update `tools.ts`, the relevant type int
 | `reddit.searchPosts()` | `getRedditPostsByKeywords` |
 | `reddit.getPostWithComments()` | `getRedditPostWithCommentsById` |
 | `reddit.searchComments()` | `getRedditCommentsByKeywords` |
+| `reddit.getCommentById()` | `getRedditCommentById` |
 | `reddit.getUser()` | `getRedditUser` |
 | `reddit.searchUsers()` | `searchRedditUsers` |
 | `reddit.getUsersByKeywords()` | `getRedditUsersByKeywords` |

@@ -36,6 +36,10 @@ export interface RedditPost {
   domain?: string | null;
   crosspostParent?: string | null;
 
+  selftextHtml?: string | null;
+  editedAt?: string | null;
+  removal?: Record<string, unknown> | null;
+
   createdAt?: string | null;
   createdAtTimestamp?: number | null;
   createdAtDate?: string | null;
@@ -108,6 +112,12 @@ export interface RedditComment {
   edited?: boolean | null;
   distinguished?: string | null;
 
+  rank?: number | null;
+  topLevelRank?: number | null;
+  collapsedReasonCode?: string | null;
+  collapsedReason?: string | null;
+  removal?: Record<string, unknown> | null;
+
   createdAt?: string | null;
   createdAtTimestamp?: number | null;
   createdAtDate?: string | null;
@@ -126,6 +136,7 @@ export interface RedditSubreddit {
   activeUserCount?: number | null;
 
   subredditType?: string | null;
+  submissionType?: string | null;
   over18?: boolean | null;
   lang?: string | null;
   url?: string | null;

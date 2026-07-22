@@ -582,6 +582,16 @@ const comments = await client.reddit.searchComments("helpful tip", {
 });
 ```
 
+#### `getCommentById(commentId, options?) -> Promise<RedditComment>`
+
+Fetch a single Reddit comment by its id (bare base36 or `t1_`-prefixed). Database-first with live API fallback when the comment is missing or stale.
+
+```typescript
+const comment = await client.reddit.getCommentById("laz1ytq", {
+  fields: ["id", "body", "rank", "removal"],
+});
+```
+
 #### `searchSubreddits(query, options?) -> Promise<RedditSubreddit[]>`
 
 Search subreddits by name. Use `limit` to adjust the number of results.

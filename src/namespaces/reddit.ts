@@ -76,6 +76,19 @@ export class RedditNamespace extends BaseNamespace {
     return this.buildPaginatedResult(result, parseComment, tools.SEARCH_REDDIT_COMMENTS, args);
   }
 
+  async getCommentById(
+    commentId: string,
+    options: { fields?: string[]; forceLatest?: boolean } = {}
+  ): Promise<RedditComment> {
+    const args = this.buildArgs({ commentId, ...options });
+    const result = await this.callAndMaybePoll(tools.GET_REDDIT_COMMENT_BY_ID, args);
+    const results = result["results"];
+    if (Array.isArray(results) && results.length > 0) {
+      return results[0] as RedditComment;
+    }
+    return result as RedditComment;
+  }
+
   async getUser(
     username: string,
     options: { fields?: string[]; forceLatest?: boolean } = {}
