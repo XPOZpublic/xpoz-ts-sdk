@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ApiTransport } from "../src/api/transport.js";
+import { XpozClient } from "../src/client.js";
 import {
   AuthenticationError,
   NotSupportedError,
@@ -171,5 +172,45 @@ describe("ApiTransport error handling", () => {
       status: 400,
       apiError: "phrase is required",
     });
+  });
+});
+
+describe("XpozClient in API mode", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("routes twitter calls through the REST API", async () => {
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ results: [{ count: 3 }] }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new XpozClient({
+      apiKey: "test-key",
+      transport: "api",
+      versionCheck: false,
+    });
+    await client.connect();
+    const count = await client.twitter.countPosts("xpoz");
+    expect(count).toBe(3);
+    const calledUrl = new URL(fetchMock.mock.calls[0][0] as string);
+    expect(calledUrl.origin).toBe("https://api.xpoz.ai");
+    expect(calledUrl.pathname).toBe("/api/data/twitter/posts/count");
+    await client.close();
+  });
+
+  it("rejects unsupported namespaces with NotSupportedError", async () => {
+    const client = new XpozClient({
+      apiKey: "test-key",
+      transport: "api",
+      versionCheck: false,
+    });
+    await client.connect();
+    await expect(client.instagram.getUser("someone")).rejects.toBeInstanceOf(NotSupportedError);
   });
 });

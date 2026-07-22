@@ -1,4 +1,5 @@
 export { XpozClient } from "./client.js";
+export type { TransportMode } from "./client.js";
 export { PaginatedResult } from "./pagination.js";
 export {
   XpozError,
