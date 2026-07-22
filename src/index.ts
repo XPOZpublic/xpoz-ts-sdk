@@ -7,6 +7,8 @@ export {
   OperationTimeoutError,
   OperationFailedError,
   OperationCancelledError,
+  NotSupportedError,
+  ApiRequestError,
 } from "./errors.js";
 export { VERSION } from "./version.js";
 export { checkForUpdates } from "./versionCheck.js";

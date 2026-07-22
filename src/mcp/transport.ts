@@ -6,12 +6,12 @@ import { VERSION } from "../version.js";
 
 const USER_AGENT = `xpoz-ts-sdk/${VERSION}`;
 
-function getProxyUrl(): string | undefined {
+export function getProxyUrl(): string | undefined {
   return process.env.HTTPS_PROXY ?? process.env.https_proxy
     ?? process.env.HTTP_PROXY ?? process.env.http_proxy;
 }
 
-async function createProxyFetch(proxyUrl: string): Promise<FetchLike> {
+export async function createProxyFetch(proxyUrl: string): Promise<FetchLike> {
   const { ProxyAgent, fetch: undiciFetch } = await import("undici");
   const dispatcher = new ProxyAgent(proxyUrl);
   return ((input: string | URL, init?: RequestInit) =>
