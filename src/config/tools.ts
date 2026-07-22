@@ -25,6 +25,7 @@ export const GET_INSTAGRAM_USERS_BY_KEYWORDS = "getInstagramUsersByKeywords";
 export const SEARCH_REDDIT_POSTS = "getRedditPostsByKeywords";
 export const GET_REDDIT_POST_WITH_COMMENTS = "getRedditPostWithCommentsById";
 export const SEARCH_REDDIT_COMMENTS = "getRedditCommentsByKeywords";
+export const GET_REDDIT_COMMENT_BY_ID = "getRedditCommentById";
 export const GET_REDDIT_USER = "getRedditUser";
 export const SEARCH_REDDIT_USERS = "searchRedditUsers";
 export const GET_REDDIT_USERS_BY_KEYWORDS = "getRedditUsersByKeywords";

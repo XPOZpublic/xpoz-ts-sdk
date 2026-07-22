@@ -125,6 +125,21 @@ describe("RedditPosts", () => {
     expect(result).toBeInstanceOf(PaginatedResult);
     expect(result.data.length).toBeGreaterThan(0);
   });
+
+  it("get_comment_by_id", async () => {
+    if (!hasClient()) return;
+    const search = await client.reddit.searchComments("python", {
+      startDate: sevenDaysAgo(),
+      fields: ["id"],
+    });
+    if (search.data.length === 0) return;
+    const commentId = search.data[0].id as string;
+    const comment = await client.reddit.getCommentById(commentId, {
+      fields: ["id", "body", "rank", "topLevelRank", "removal"],
+    });
+    expect(comment).toBeDefined();
+    expect(comment.id).toBe(commentId);
+  });
 });
 
 describe("RedditSubreddits", () => {
