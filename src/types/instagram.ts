@@ -26,9 +26,9 @@ export interface InstagramPost {
   genAiChatWithAiCtaInfo?: string | null;
   hasHighRiskGenAiInformTreatment?: boolean | null;
 
-  createdAt?: string | null;
-  createdAtTimestamp?: number | null;
-  createdAtDate?: string | null;
+  createdAt?: string | number | null;
+  createdAtTimestamp?: string | number | null;
+  createdAtDate?: string | number | null;
 
   [key: string]: unknown;
 }
@@ -80,9 +80,9 @@ export interface InstagramComment {
   isSpam?: boolean | null;
   hasTranslation?: boolean | null;
 
-  createdAt?: string | null;
-  createdAtTimestamp?: number | null;
-  createdAtDate?: string | null;
+  createdAt?: string | number | null;
+  createdAtTimestamp?: string | number | null;
+  createdAtDate?: string | number | null;
 
   [key: string]: unknown;
 }

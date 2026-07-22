@@ -40,9 +40,9 @@ export interface RedditPost {
   editedAt?: string | null;
   removal?: Record<string, unknown> | null;
 
-  createdAt?: string | null;
-  createdAtTimestamp?: number | null;
-  createdAtDate?: string | null;
+  createdAt?: string | number | null;
+  createdAtTimestamp?: string | number | null;
+  createdAtDate?: string | number | null;
 
   [key: string]: unknown;
 }
@@ -76,9 +76,9 @@ export interface RedditUser {
   profileBannerUrl?: string | null;
   profileTitle?: string | null;
 
-  createdAt?: string | null;
-  createdAtTimestamp?: number | null;
-  createdAtDate?: string | null;
+  createdAt?: string | number | null;
+  createdAtTimestamp?: string | number | null;
+  createdAtDate?: string | number | null;
 
   aggRelevance?: number | null;
   relevantPostsCount?: number | null;
@@ -118,9 +118,9 @@ export interface RedditComment {
   collapsedReason?: string | null;
   removal?: Record<string, unknown> | null;
 
-  createdAt?: string | null;
-  createdAtTimestamp?: number | null;
-  createdAtDate?: string | null;
+  createdAt?: string | number | null;
+  createdAtTimestamp?: string | number | null;
+  createdAtDate?: string | number | null;
 
   [key: string]: unknown;
 }
@@ -147,9 +147,9 @@ export interface RedditSubreddit {
   headerImg?: string | null;
   communityIcon?: string | null;
 
-  createdAt?: string | null;
-  createdAtTimestamp?: number | null;
-  createdAtDate?: string | null;
+  createdAt?: string | number | null;
+  createdAtTimestamp?: string | number | null;
+  createdAtDate?: string | number | null;
 
   aggRelevance?: number | null;
   relevantPostsCount?: number | null;
