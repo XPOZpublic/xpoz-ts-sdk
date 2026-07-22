@@ -112,6 +112,20 @@ The trial token is rate-limited and intentionally restricted:
 
 For full result limits, pagination, CSV export, and live data, [get your own API key](https://xpoz.ai/get-token).
 
+## API transport (beta)
+
+Call the Xpoz REST API directly instead of the MCP server. Twitter only for now.
+
+```typescript
+const client = new XpozClient({ apiKey: "...", transport: "api" });
+await client.connect(); // no-op in API mode, kept for compatibility
+const posts = await client.twitter.searchPosts("xpoz");
+```
+
+Methods without a REST equivalent yet (`twitter.getUser`, `twitter.getUsers`,
+`twitter.searchUsers`, and the instagram/reddit/tiktok/tracking/account
+namespaces) throw `NotSupportedError` in this mode.
+
 ## Async Disposal
 
 ```typescript
