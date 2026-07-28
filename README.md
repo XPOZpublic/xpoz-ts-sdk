@@ -839,7 +839,11 @@ All fields are optional and typed as their respective TypeScript types. Unknown 
 | `mentions`          | `string[]` | Mentioned usernames        |
 | `mediaUrls`         | `string[]` | Media attachment URLs      |
 | `urls`              | `string[]` | URLs in tweet text         |
-| `country`           | `string`   | Country (if geo-tagged)    |
+| `placeName`         | `string`   | Tagged place name          |
+| `placeCountry`      | `string`   | Tagged place country       |
+| `placeCountryCode`  | `string`   | Tagged place country code (ISO 3166-1 alpha-2) |
+| `placeBoundingBoxCoordinates` | `unknown` | Tagged place bounding box  |
+| `placeCentroid`     | `unknown`  | Tagged place centroid      |
 | `createdAt`         | `string \| number` | Creation datetime (ISO 8601) |
 | `createdAtDate`     | `string \| number` | Creation date (ISO midnight, no time-of-day) |
 | `conversationId`    | `string`   | Thread conversation ID     |

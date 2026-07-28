@@ -37,9 +37,11 @@ export interface TwitterPost {
   urls?: string[] | null;
   grokGeneratedContent?: Record<string, unknown>[] | null;
 
-  country?: string | null;
-  region?: string | null;
-  city?: string | null;
+  placeName?: string | null;
+  placeCountry?: string | null;
+  placeCountryCode?: string | null;
+  placeBoundingBoxCoordinates?: unknown | null;
+  placeCentroid?: unknown | null;
 
   createdAt?: string | number | null;
   createdAtDate?: string | number | null;
