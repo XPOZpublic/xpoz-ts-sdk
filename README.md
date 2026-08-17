@@ -154,6 +154,45 @@ const page5 = await results.getPage(5);     // jump to specific page
 const csvUrl = await results.exportCsv();   // returns download URL
 ```
 
+## Live Data — `client.instagramLive`
+
+Instagram live methods bypass the database and fetch straight from the crawler API, so results are always current. They page with an opaque **cursor** rather than page numbers, and return a `CursorResult<T>`:
+
+```typescript
+const page = await client.instagramLive.searchPosts("travel", { fields: ["id", "caption"] });
+
+page.data;             // InstagramPost[] — this page
+page.hasMore;          // another page is available upstream
+page.nextPageCursor;   // opaque token for the next call
+page.hasNextPage();    // boolean
+
+const next = await page.nextPage();
+
+// Walk every page
+for await (const post of page.items()) {
+  console.log(post.id);
+}
+```
+
+Cursor paging is forward-only: there is no `getPage(n)`, `totalPages`, or `totalRows`, because the upstream API does not report them. Drive iteration off `hasMore` and the cursor — never off the item count, since a page can be short or empty while `hasMore` is still true.
+
+These routes talk to the Xpoz REST API rather than the MCP server, so **`connect()` is not required** to use them. Override the base URL with `new XpozClient({ apiUrl })` or the `XPOZ_API_URL` environment variable.
+
+They always trigger a live fetch, so they are **not available on trial access** and throw `AuthenticationError` (HTTP 403).
+
+| Method | Returns |
+|---|---|
+| `searchPosts(query, options?)` | `CursorResult<InstagramPost>` |
+| `getPostsByUser(identifier, options?)` | `CursorResult<InstagramPost>` |
+| `getPost(postId, options?)` | `InstagramPost \| null` |
+| `getComments(postId, options?)` | `CursorResult<InstagramComment>` |
+| `getPostInteractingUsers(postId, interactionType, options?)` | `CursorResult<InstagramUser>` |
+| `searchUsers(name, options?)` | `CursorResult<InstagramUser>` |
+| `getUser(identifier, options?)` | `InstagramUser \| null` |
+| `getUserConnections(identifier, connectionType, options?)` | `CursorResult<InstagramUser>` |
+
+`interactionType` is `"commenters"` or `"likers"`; `connectionType` is `"followers"` or `"following"`.
+
 ## Field Selection
 
 All methods accept a `fields` option. Use camelCase field names.

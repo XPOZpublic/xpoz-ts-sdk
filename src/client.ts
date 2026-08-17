@@ -1,6 +1,9 @@
 import { McpTransport } from "./mcp/transport.js";
 import { AuthenticationError } from "./errors.js";
 import { DEFAULT_SERVER_URL, DEFAULT_TIMEOUT_MS, ENV_API_KEY, ENV_SERVER_URL } from "./config/constants.js";
+import { DEFAULT_API_URL, ENV_API_URL } from "./config/routes.js";
+import { RestTransport } from "./rest/transport.js";
+import { InstagramLiveNamespace } from "./namespaces/instagramLive.js";
 import { TwitterNamespace } from "./namespaces/twitter.js";
 import { InstagramNamespace } from "./namespaces/instagram.js";
 import { RedditNamespace } from "./namespaces/reddit.js";
@@ -19,12 +22,15 @@ export class XpozClient {
 
   private transport: McpTransport;
   private versionCheck: boolean;
+  private restTransport: RestTransport;
+  private instagramLiveNamespace?: InstagramLiveNamespace;
 
   constructor(options: {
     apiKey?: string;
     serverUrl?: string;
     timeoutMs?: number;
     versionCheck?: boolean;
+    apiUrl?: string;
   } = {}) {
     const apiKey = options.apiKey ?? process.env[ENV_API_KEY];
     if (!apiKey) {
@@ -42,6 +48,9 @@ export class XpozClient {
 
     this.transport = new McpTransport(serverUrl, apiKey);
 
+    const apiUrl = options.apiUrl ?? process.env[ENV_API_URL] ?? DEFAULT_API_URL;
+    this.restTransport = new RestTransport(apiUrl, apiKey);
+
     const callTool = this.transport.callTool.bind(this.transport);
     this.twitter = new TwitterNamespace(callTool, timeoutMs);
     this.instagram = new InstagramNamespace(callTool, timeoutMs);
@@ -49,6 +58,13 @@ export class XpozClient {
     this.tiktok = new TiktokNamespace(callTool, timeoutMs);
     this.tracking = new TrackingNamespace(callTool, timeoutMs);
     this.account = new AccountNamespace(callTool, timeoutMs);
+  }
+
+  get instagramLive(): InstagramLiveNamespace {
+    if (!this.instagramLiveNamespace) {
+      this.instagramLiveNamespace = new InstagramLiveNamespace(this.restTransport);
+    }
+    return this.instagramLiveNamespace;
   }
 
   async connect(): Promise<void> {
