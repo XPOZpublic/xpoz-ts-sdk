@@ -21,6 +21,9 @@ xpoz-ts/
     ├── pagination.ts       # PaginatedResult<T>
     ├── errors.ts           # Error hierarchy
     ├── version.ts          # VERSION string
+    ├── cursor.ts           # CursorResult<T> for the live (cursor-paged) routes
+    ├── rest/               # REST layer for the live routes (xpoz-api, not MCP)
+    │   └── transport.ts    # fetch-based client + HTTP error mapping
     ├── mcp/                # MCP protocol layer
     │   ├── index.ts
     │   ├── transport.ts    # MCP Streamable HTTP transport wrapper
@@ -169,6 +172,16 @@ When xpoz-mcp adds new fields or tools, update `tools.ts`, the relevant type int
 | `reddit.searchSubreddits()` | `searchRedditSubreddits` |
 | `reddit.getSubredditWithPosts()` | `getRedditSubredditWithPostsByName` |
 | `reddit.getSubredditsByKeywords()` | `getRedditSubredditsByKeywords` |
+
+## Two Backends
+
+Most namespaces call **xpoz-mcp** over MCP protocol (`mcp.xpoz.ai`). The `instagramLive` namespace is different: it calls **xpoz-api** over plain HTTP (`api.xpoz.ai`, override with `XPOZ_API_URL`), because the `/live` routes exist only there and xpoz-mcp does not expose them as tools.
+
+Both share the same API key. The REST namespace is created lazily and needs no `connect()` — MCP-only users pay nothing for it, and live-only users never open an MCP session.
+
+Live routes bypass the database and page with an opaque cursor, so they return `CursorResult` rather than `PaginatedResult` — forward-only, no page numbers or totals. Drive iteration off `hasMore` and the cursor, never the item count: upstream may return a short or empty page while `hasMore` is true.
+
+`instagramLive.ts` coerces integer `id`/`userId`/`postId` values to strings, because `/v2/post/commenters` returns numeric ids while the models type them as strings.
 
 ## Conventions
 

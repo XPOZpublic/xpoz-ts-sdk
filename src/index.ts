@@ -1,9 +1,12 @@
 export { XpozClient } from "./client.js";
 export { PaginatedResult } from "./pagination.js";
+export { CursorResult } from "./cursor.js";
 export {
   XpozError,
   AuthenticationError,
   XpozConnectionError,
+  NotFoundError,
+  ValidationError,
   OperationTimeoutError,
   OperationFailedError,
   OperationCancelledError,
@@ -11,7 +14,12 @@ export {
 export { VERSION } from "./version.js";
 export { checkForUpdates } from "./versionCheck.js";
 export { ResponseType } from "./config/constants.js";
-export type { PaginationInfo } from "./types/common.js";
+export type {
+  PaginationInfo,
+  CursorPageResponse,
+  InstagramConnectionType,
+  InstagramInteractionType,
+} from "./types/common.js";
 export type { TwitterPost, TwitterUser } from "./types/twitter.js";
 export type { InstagramPost, InstagramUser, InstagramComment } from "./types/instagram.js";
 export type {

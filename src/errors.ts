@@ -19,6 +19,20 @@ export class XpozConnectionError extends XpozError {
   }
 }
 
+export class NotFoundError extends XpozError {
+  constructor(message: string) {
+    super(message);
+    this.name = "NotFoundError";
+  }
+}
+
+export class ValidationError extends XpozError {
+  constructor(message: string) {
+    super(message);
+    this.name = "ValidationError";
+  }
+}
+
 export class OperationTimeoutError extends XpozError {
   operationId: string;
   elapsedMs: number;
