@@ -926,6 +926,8 @@ All fields are optional and typed as their respective TypeScript types. Unknown 
 | `likeCount`      | `number` | Number of likes            |
 | `commentCount`   | `number` | Number of comments         |
 | `reshareCount`   | `number` | Number of reshares         |
+| `mediaRepostCount` | `number` | Number of media reposts  |
+| `saveCount`      | `number` | Number of saves            |
 | `videoPlayCount` | `number` | Video play count           |
 | `mediaType`      | `string` | Media type                 |
 | `imageUrl`       | `string` | Image URL                  |
