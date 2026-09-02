@@ -20,6 +20,8 @@ export interface InstagramPost {
   likeCount?: number | null;
   commentCount?: number | null;
   reshareCount?: number | null;
+  mediaRepostCount?: number | null;
+  saveCount?: number | null;
   videoPlayCount?: number | null;
 
   location?: string | null;
@@ -56,6 +58,8 @@ export interface InstagramUser {
   relevantPostsLikesSum?: number | null;
   relevantPostsCommentsSum?: number | null;
   relevantPostsResharesSum?: number | null;
+  relevantPostsMediaRepostsSum?: number | null;
+  relevantPostsSavesSum?: number | null;
   relevantPostsVideoPlaysSum?: number | null;
 
   [key: string]: unknown;
