@@ -4,6 +4,7 @@ import { DEFAULT_SERVER_URL, DEFAULT_TIMEOUT_MS, ENV_API_KEY, ENV_SERVER_URL } f
 import { DEFAULT_API_URL, ENV_API_URL } from "./config/routes.js";
 import { RestTransport } from "./rest/transport.js";
 import { InstagramLiveNamespace } from "./namespaces/instagramLive.js";
+import { TwitterLiveNamespace } from "./namespaces/twitterLive.js";
 import { TwitterNamespace } from "./namespaces/twitter.js";
 import { InstagramNamespace } from "./namespaces/instagram.js";
 import { RedditNamespace } from "./namespaces/reddit.js";
@@ -24,6 +25,7 @@ export class XpozClient {
   private versionCheck: boolean;
   private restTransport: RestTransport;
   private instagramLiveNamespace?: InstagramLiveNamespace;
+  private twitterLiveNamespace?: TwitterLiveNamespace;
 
   constructor(options: {
     apiKey?: string;
@@ -65,6 +67,13 @@ export class XpozClient {
       this.instagramLiveNamespace = new InstagramLiveNamespace(this.restTransport);
     }
     return this.instagramLiveNamespace;
+  }
+
+  get twitterLive(): TwitterLiveNamespace {
+    if (!this.twitterLiveNamespace) {
+      this.twitterLiveNamespace = new TwitterLiveNamespace(this.restTransport);
+    }
+    return this.twitterLiveNamespace;
   }
 
   async connect(): Promise<void> {

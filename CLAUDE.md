@@ -43,8 +43,11 @@ xpoz-ts/
     │   └── reddit.ts       # RedditPost, RedditUser, RedditComment, RedditSubreddit, composites
     └── namespaces/         # Platform method groups
         ├── base.ts         # BaseNamespace (shared logic)
+        ├── liveBase.ts     # LiveNamespace (shared cursor paging for the live routes)
         ├── twitter.ts      # TwitterNamespace (12 methods)
+        ├── twitterLive.ts  # TwitterLiveNamespace (9 cursor-paged methods)
         ├── instagram.ts    # InstagramNamespace (9 methods)
+        ├── instagramLive.ts # InstagramLiveNamespace (8 cursor-paged methods)
         └── reddit.ts       # RedditNamespace (9 methods)
 ```
 
@@ -175,13 +178,25 @@ When xpoz-mcp adds new fields or tools, update `tools.ts`, the relevant type int
 
 ## Two Backends
 
-Most namespaces call **xpoz-mcp** over MCP protocol (`mcp.xpoz.ai`). The `instagramLive` namespace is different: it calls **xpoz-api** over plain HTTP (`api.xpoz.ai`, override with `XPOZ_API_URL`), because the `/live` routes exist only there and xpoz-mcp does not expose them as tools.
+Most namespaces call **xpoz-mcp** over MCP protocol (`mcp.xpoz.ai`). The `instagramLive` and `twitterLive` namespaces are different: they call **xpoz-api** over plain HTTP (`api.xpoz.ai`, override with `XPOZ_API_URL`), because the `/live` routes exist only there and xpoz-mcp does not expose them as tools.
 
 Both share the same API key. The REST namespace is created lazily and needs no `connect()` — MCP-only users pay nothing for it, and live-only users never open an MCP session.
 
 Live routes bypass the database and page with an opaque cursor, so they return `CursorResult` rather than `PaginatedResult` — forward-only, no page numbers or totals. Drive iteration off `hasMore` and the cursor, never the item count: upstream may return a short or empty page while `hasMore` is true.
 
-`instagramLive.ts` coerces integer `id`/`userId`/`postId` values to strings, because `/v2/post/commenters` returns numeric ids while the models type them as strings.
+`liveBase.ts` coerces integer `id`/`userId`/`postId`/`authorId` values to strings, because `/v2/post/commenters` returns numeric ids while the models type them as strings.
+
+| Live route | Upstream (via xpoz-api) |
+|---|---|
+| `twitterLive.searchPosts()` | `/v2/search/tweets` |
+| `twitterLive.getPostsByUser()` | `/v2/user/tweets` |
+| `twitterLive.getPost()` | `/v2/tweet` |
+| `twitterLive.getComments()` | `/v2/tweet/comments` |
+| `twitterLive.getQuotes()` | `/v2/tweet/quotes` |
+| `twitterLive.getPostInteractingUsers()` | `/v2/tweet/commenters`, `/v2/tweet/quoters`, `/v2/tweet/retweeters` |
+| `twitterLive.searchUsers()` | `/v2/search/users` |
+| `twitterLive.getUser()` | `/v2/user` |
+| `twitterLive.getUserConnections()` | `/v2/user/followers`, `/v2/user/following` |
 
 ## Conventions
 
