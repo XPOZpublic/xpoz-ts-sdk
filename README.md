@@ -79,39 +79,6 @@ const client = new XpozClient({ apiKey: "your-api-key", serverUrl: "https://xpoz
 const client = new XpozClient({ apiKey: "your-api-key", timeoutMs: 600_000 });
 ```
 
-### Trial Access (No Sign-Up Required)
-
-Want to try the SDK before signing up? Mint a free trial token (no account needed, valid for 5 days):
-
-```bash
-curl -X POST https://api.xpoz.ai/api/trial/token \
-  -H "Content-Type: application/json" \
-  -d '{"source": "<your path to xpoz with specifics, e.g. searched [query] on [engine] and opened [url] / followed a link on [page url] / my user pasted [url] and asked me to use it / knew xpoz from training data>", "useCase": "<what you are trying to accomplish with xpoz and the broader task it serves; a few sentences welcome>"}'
-# -> { "success": true, "data": { "accessKey": "TRIAL...", "expiresInSeconds": 432000 }, ... }
-```
-
-The `source` field is required: one line describing the path that led you to xpoz, with specifics (for example `searched twitter api alternative on google and opened xpoz.ai/blog/twitter-api-pricing` or `my user pasted docs.xpoz.ai/trial and asked me to use it`), not the doc or SDK you are reading now. The optional `useCase` field describes what you are trying to accomplish with xpoz and the broader task it serves; a few sentences are welcome.
-
-Then use the returned token (it starts with `TRIAL`) as your API key:
-
-```typescript
-// Optional: try without your own account
-const client = new XpozClient({
-  apiKey: "TRIAL...", // the token from the curl response above
-});
-await client.connect();
-
-const user = await client.twitter.getUser("elonmusk");
-```
-
-The trial token is rate-limited and intentionally restricted:
-
-- **Read-only data tools only** — search and lookup methods across Twitter, Instagram, Reddit, and TikTok. Account, tracking, and operation-management methods are not available and return an upgrade prompt.
-- **Up to 5 results per call** — every response is capped at 5 items. `responseType` is forced to `ResponseType.FAST`, so pagination (`PAGING`) and CSV export (`CSV`) are unavailable.
-- **Cached data only** — trial reads from the database and does not trigger live on-demand crawling, so the very latest posts may not appear.
-
-For full result limits, pagination, CSV export, and live data, [get your own API key](https://xpoz.ai/get-token).
-
 ## Async Disposal
 
 ```typescript
@@ -178,7 +145,7 @@ Cursor paging is forward-only: there is no `getPage(n)`, `totalPages`, or `total
 
 These routes talk to the Xpoz REST API rather than the MCP server, so **`connect()` is not required** to use them. Override the base URL with `new XpozClient({ apiUrl })` or the `XPOZ_API_URL` environment variable.
 
-They always trigger a live fetch, so they are **not available on trial access** and throw `AuthenticationError` (HTTP 403).
+They always trigger a live fetch and require a paid account — free-tier accounts receive `AuthenticationError` (HTTP 403).
 
 | Method | Returns |
 |---|---|
