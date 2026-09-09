@@ -9,6 +9,10 @@ export interface CursorPageResponse<T> {
 export type InstagramConnectionType = "followers" | "following";
 export type InstagramInteractionType = "commenters" | "likers";
 
+export type TwitterConnectionType = "followers" | "following";
+export type TwitterInteractionType = "commenters" | "quoters" | "retweeters";
+export type TwitterLiveSortBy = "relevance" | "latest";
+
 export interface PaginationInfo {
   tableName?: string | null;
   totalRows: number;

@@ -154,9 +154,9 @@ const page5 = await results.getPage(5);     // jump to specific page
 const csvUrl = await results.exportCsv();   // returns download URL
 ```
 
-## Live Data — `client.instagramLive`
+## Live Data — `client.instagramLive` and `client.twitterLive`
 
-Instagram live methods bypass the database and fetch straight from the crawler API, so results are always current. They page with an opaque **cursor** rather than page numbers, and return a `CursorResult<T>`:
+Live methods bypass the database and fetch straight from the crawler API, so results are always current. They page with an opaque **cursor** rather than page numbers, and return a `CursorResult<T>`:
 
 ```typescript
 const page = await client.instagramLive.searchPosts("travel", { fields: ["id", "caption"] });
@@ -192,6 +192,36 @@ They always trigger a live fetch, so they are **not available on trial access** 
 | `getUserConnections(identifier, connectionType, options?)` | `CursorResult<InstagramUser>` |
 
 `interactionType` is `"commenters"` or `"likers"`; `connectionType` is `"followers"` or `"following"`.
+
+### `client.twitterLive`
+
+Same cursor paging, backed by the Twitter/X live routes:
+
+```typescript
+const page = await client.twitterLive.searchPosts("open source", {
+  since: "2026-01-01",
+  sortBy: "latest",
+  fields: ["id", "text", "likeCount"],
+});
+
+for await (const tweet of page.items()) {
+  console.log(tweet.text);
+}
+```
+
+| Method | Returns |
+|---|---|
+| `searchPosts(query, options?)` | `CursorResult<TwitterPost>` |
+| `getPostsByUser(username, options?)` | `CursorResult<TwitterPost>` |
+| `getPost(postId, options?)` | `TwitterPost \| null` |
+| `getComments(postId, options?)` | `CursorResult<TwitterPost>` |
+| `getQuotes(postId, options?)` | `CursorResult<TwitterPost>` |
+| `getPostInteractingUsers(postId, interactionType, options?)` | `CursorResult<TwitterUser>` |
+| `searchUsers(query, options?)` | `CursorResult<TwitterUser>` |
+| `getUser(username, options?)` | `TwitterUser \| null` |
+| `getUserConnections(username, connectionType, options?)` | `CursorResult<TwitterUser>` |
+
+`searchPosts` also accepts `since`, `until` (`YYYY-MM-DD`), `lang`, `countryCode`, and `sortBy` (`"relevance"` or `"latest"`); `getPostsByUser` accepts `since` and `until`. `interactionType` is `"commenters"`, `"quoters"`, or `"retweeters"`; `connectionType` is `"followers"` or `"following"`. Retweets have no live route.
 
 ## Field Selection
 

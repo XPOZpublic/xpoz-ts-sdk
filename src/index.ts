@@ -19,6 +19,9 @@ export type {
   CursorPageResponse,
   InstagramConnectionType,
   InstagramInteractionType,
+  TwitterConnectionType,
+  TwitterInteractionType,
+  TwitterLiveSortBy,
 } from "./types/common.js";
 export type { TwitterPost, TwitterUser } from "./types/twitter.js";
 export type { InstagramPost, InstagramUser, InstagramComment } from "./types/instagram.js";
