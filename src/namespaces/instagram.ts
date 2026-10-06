@@ -1,10 +1,19 @@
 import { BaseNamespace } from "./base.js";
 import { PaginatedResult } from "../pagination.js";
 import type { InstagramPost, InstagramUser, InstagramComment } from "../types/instagram.js";
+import type { CursorPageResponse, PaginationInfo } from "../types/common.js";
+import type { RestTransport } from "../rest/transport.js";
+import { INSTAGRAM_ROUTES, INSTAGRAM_LIVE_ROUTES } from "../config/routes.js";
+import { csvFields } from "./liveBase.js";
 import * as tools from "../config/tools.js";
 import { ResponseType } from "../config/constants.js";
 
 type RawDict = Record<string, unknown>;
+
+interface UserResponse {
+  results: InstagramUser[];
+  count: number;
+}
 
 function parsePost(item: RawDict): InstagramPost {
   return item as InstagramPost;
@@ -19,6 +28,53 @@ function parseComment(item: RawDict): InstagramComment {
 }
 
 export class InstagramNamespace extends BaseNamespace {
+  private rest: RestTransport;
+
+  constructor(
+    callTool: (name: string, args: Record<string, unknown>) => Promise<Record<string, unknown>>,
+    timeoutMs: number,
+    restTransport: RestTransport
+  ) {
+    super(callTool, timeoutMs);
+    this.rest = restTransport;
+  }
+
+  private cursorToPaginatedResult<T>(
+    response: CursorPageResponse<T>,
+    fetchNext: (cursor: string) => Promise<CursorPageResponse<T>>,
+    pageNumber: number = 1
+  ): PaginatedResult<T> {
+    const items = response.results ?? [];
+    const hasMore = Boolean(response.has_more);
+    const nextCursor = response.next_page_cursor ?? null;
+
+    const pagination: PaginationInfo = {
+      tableName: null,
+      totalRows: 0,
+      totalPages: hasMore ? pageNumber + 1 : pageNumber,
+      pageNumber,
+      pageSize: items.length,
+      resultsCount: items.length,
+    };
+
+    const fetchPage = async (): Promise<PaginatedResult<T>> => {
+      if (!nextCursor) {
+        throw new RangeError("No more pages available");
+      }
+      const nextResponse = await fetchNext(nextCursor);
+      return this.cursorToPaginatedResult(nextResponse, fetchNext, pageNumber + 1);
+    };
+
+    return new PaginatedResult<T>({
+      data: items,
+      pagination,
+      tableName: null,
+      exportOperationId: null,
+      fetchPage: () => fetchPage(),
+      fetchExport: null,
+    });
+  }
+
   async getPostsByIds(
     postIds: string[],
     options: { fields?: string[]; forceLatest?: boolean } = {}
@@ -101,27 +157,36 @@ export class InstagramNamespace extends BaseNamespace {
     identifier: string,
     options: { identifierType?: string; fields?: string[]; forceLatest?: boolean } = {}
   ): Promise<InstagramUser> {
-    const args = this.buildArgs({
-      identifier,
-      identifierType: options.identifierType ?? "username",
-      fields: options.fields,
-      forceLatest: options.forceLatest,
-    });
-    const result = await this.callAndMaybePoll(tools.GET_INSTAGRAM_USER, args);
-    const results = result["results"];
-    if (Array.isArray(results) && results.length > 0) {
-      return results[0] as InstagramUser;
+    const response = await this.rest.get<UserResponse>(
+      INSTAGRAM_ROUTES.user(identifier),
+      {
+        identifierType: options.identifierType ?? "username",
+        fields: csvFields(options.fields),
+        forceLatest: true,
+      }
+    );
+    if (response.results.length > 0) {
+      return response.results[0];
     }
-    return result as InstagramUser;
+    throw new Error(`User not found: ${identifier}`);
   }
 
   async searchUsers(
     name: string,
     options: { limit?: number; fields?: string[] } = {}
   ): Promise<InstagramUser[]> {
-    const args = this.buildArgs({ name, ...options });
-    const result = await this.callAndMaybePoll(tools.SEARCH_INSTAGRAM_USERS, args);
-    return ((result["results"] as RawDict[]) ?? []).map(parseUser);
+    const response = await this.rest.get<UserResponse>(
+      INSTAGRAM_LIVE_ROUTES.users,
+      {
+        name,
+        fields: csvFields(options.fields),
+      }
+    );
+    const users = response.results ?? [];
+    if (options.limit && options.limit > 0) {
+      return users.slice(0, options.limit);
+    }
+    return users;
   }
 
   async getUserConnections(
@@ -129,13 +194,19 @@ export class InstagramNamespace extends BaseNamespace {
     connectionType: string,
     options: { fields?: string[]; forceLatest?: boolean } = {}
   ): Promise<PaginatedResult<InstagramUser>> {
-    const args = this.buildArgs({ username, connectionType, ...options });
-    const result = await this.callAndMaybePoll(tools.GET_INSTAGRAM_USER_CONNECTIONS, args);
-    return this.buildPaginatedResult(
-      result,
-      parseUser,
-      tools.GET_INSTAGRAM_USER_CONNECTIONS,
-      args
+    const params = {
+      connectionType,
+      fields: csvFields(options.fields),
+    };
+    const response = await this.rest.get<CursorPageResponse<InstagramUser>>(
+      INSTAGRAM_LIVE_ROUTES.userConnections(username),
+      params
+    );
+    return this.cursorToPaginatedResult(response, (cursor) =>
+      this.rest.get<CursorPageResponse<InstagramUser>>(
+        INSTAGRAM_LIVE_ROUTES.userConnections(username),
+        { ...params, cursor }
+      )
     );
   }
 
@@ -144,16 +215,19 @@ export class InstagramNamespace extends BaseNamespace {
     interactionType: string,
     options: { fields?: string[]; forceLatest?: boolean } = {}
   ): Promise<PaginatedResult<InstagramUser>> {
-    const args = this.buildArgs({ postId, interactionType, ...options });
-    const result = await this.callAndMaybePoll(
-      tools.GET_INSTAGRAM_POST_INTERACTING_USERS,
-      args
+    const params = {
+      interactionType,
+      fields: csvFields(options.fields),
+    };
+    const response = await this.rest.get<CursorPageResponse<InstagramUser>>(
+      INSTAGRAM_LIVE_ROUTES.postInteractingUsers(postId),
+      params
     );
-    return this.buildPaginatedResult(
-      result,
-      parseUser,
-      tools.GET_INSTAGRAM_POST_INTERACTING_USERS,
-      args
+    return this.cursorToPaginatedResult(response, (cursor) =>
+      this.rest.get<CursorPageResponse<InstagramUser>>(
+        INSTAGRAM_LIVE_ROUTES.postInteractingUsers(postId),
+        { ...params, cursor }
+      )
     );
   }
 
