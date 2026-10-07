@@ -4,6 +4,10 @@ export const ENV_API_URL = "XPOZ_API_URL";
 const INSTAGRAM_BASE = "/api/data/instagram";
 const TWITTER_BASE = "/api/data/twitter";
 
+export const INSTAGRAM_ROUTES = {
+  user: (identifier: string) => `${INSTAGRAM_BASE}/users/${encodeURIComponent(identifier)}`,
+} as const;
+
 export const INSTAGRAM_LIVE_ROUTES = {
   posts: `${INSTAGRAM_BASE}/posts/live`,
   userPosts: (identifier: string) =>
