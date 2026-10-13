@@ -79,9 +79,15 @@ export class InstagramNamespace extends BaseNamespace {
     postIds: string[],
     options: { fields?: string[]; forceLatest?: boolean } = {}
   ): Promise<InstagramPost[]> {
-    const args = this.buildArgs({ postIds, ...options });
-    const result = await this.callAndMaybePoll(tools.GET_INSTAGRAM_POSTS_BY_IDS, args);
-    return ((result["results"] as RawDict[]) ?? []).map(parsePost);
+    const response = await this.rest.get<{ results: InstagramPost[] }>(
+      INSTAGRAM_ROUTES.postsByIds,
+      {
+        ids: postIds.join(","),
+        fields: csvFields(options.fields),
+        forceLatest: true,
+      }
+    );
+    return response.results ?? [];
   }
 
   async getPostsByUser(
@@ -96,22 +102,33 @@ export class InstagramNamespace extends BaseNamespace {
       limit?: number;
     } = {}
   ): Promise<PaginatedResult<InstagramPost>> {
-    const args = this.buildArgs({
-      identifier,
-      identifierType: options.identifierType ?? "username",
-      fields: options.fields,
-      startDate: options.startDate,
-      endDate: options.endDate,
-      forceLatest: options.forceLatest,
-      responseType: options.responseType,
-      limit: options.limit,
-    });
-    const result = await this.callAndMaybePoll(tools.GET_INSTAGRAM_POSTS_BY_USER, args);
-    return this.buildPaginatedResult(
-      result,
-      parsePost,
-      tools.GET_INSTAGRAM_POSTS_BY_USER,
-      args
+    if (options.responseType === ResponseType.Csv) {
+      const args = this.buildArgs({
+        identifier,
+        identifierType: options.identifierType ?? "username",
+        fields: options.fields,
+        startDate: options.startDate,
+        endDate: options.endDate,
+        forceLatest: options.forceLatest,
+        responseType: options.responseType,
+        limit: options.limit,
+      });
+      const result = await this.callAndMaybePoll(tools.GET_INSTAGRAM_POSTS_BY_USER, args);
+      return this.buildPaginatedResult(result, parsePost, tools.GET_INSTAGRAM_POSTS_BY_USER, args);
+    }
+
+    const params = {
+      fields: csvFields(options.fields),
+    };
+    const response = await this.rest.get<CursorPageResponse<InstagramPost>>(
+      INSTAGRAM_LIVE_ROUTES.userPosts(identifier),
+      params
+    );
+    return this.cursorToPaginatedResult(response, (cursor) =>
+      this.rest.get<CursorPageResponse<InstagramPost>>(
+        INSTAGRAM_LIVE_ROUTES.userPosts(identifier),
+        { ...params, cursor }
+      )
     );
   }
 
@@ -126,17 +143,34 @@ export class InstagramNamespace extends BaseNamespace {
       limit?: number;
     } = {}
   ): Promise<PaginatedResult<InstagramPost>> {
-    const args = this.buildArgs({
-      query,
-      fields: options.fields,
-      startDate: options.startDate,
-      endDate: options.endDate,
-      forceLatest: options.forceLatest,
-      responseType: options.responseType,
-      limit: options.limit,
-    });
-    const result = await this.callAndMaybePoll(tools.SEARCH_INSTAGRAM_POSTS, args);
-    return this.buildPaginatedResult(result, parsePost, tools.SEARCH_INSTAGRAM_POSTS, args);
+    if (options.responseType === ResponseType.Csv) {
+      const args = this.buildArgs({
+        query,
+        fields: options.fields,
+        startDate: options.startDate,
+        endDate: options.endDate,
+        forceLatest: options.forceLatest,
+        responseType: options.responseType,
+        limit: options.limit,
+      });
+      const result = await this.callAndMaybePoll(tools.SEARCH_INSTAGRAM_POSTS, args);
+      return this.buildPaginatedResult(result, parsePost, tools.SEARCH_INSTAGRAM_POSTS, args);
+    }
+
+    const params = {
+      q: query,
+      fields: csvFields(options.fields),
+    };
+    const response = await this.rest.get<CursorPageResponse<InstagramPost>>(
+      INSTAGRAM_LIVE_ROUTES.posts,
+      params
+    );
+    return this.cursorToPaginatedResult(response, (cursor) =>
+      this.rest.get<CursorPageResponse<InstagramPost>>(
+        INSTAGRAM_LIVE_ROUTES.posts,
+        { ...params, cursor }
+      )
+    );
   }
 
   async getComments(
@@ -148,9 +182,19 @@ export class InstagramNamespace extends BaseNamespace {
       forceLatest?: boolean;
     } = {}
   ): Promise<PaginatedResult<InstagramComment>> {
-    const args = this.buildArgs({ postId, ...options });
-    const result = await this.callAndMaybePoll(tools.GET_INSTAGRAM_COMMENTS, args);
-    return this.buildPaginatedResult(result, parseComment, tools.GET_INSTAGRAM_COMMENTS, args);
+    const params = {
+      fields: csvFields(options.fields),
+    };
+    const response = await this.rest.get<CursorPageResponse<InstagramComment>>(
+      INSTAGRAM_LIVE_ROUTES.postComments(postId),
+      params
+    );
+    return this.cursorToPaginatedResult(response, (cursor) =>
+      this.rest.get<CursorPageResponse<InstagramComment>>(
+        INSTAGRAM_LIVE_ROUTES.postComments(postId),
+        { ...params, cursor }
+      )
+    );
   }
 
   async getUser(
