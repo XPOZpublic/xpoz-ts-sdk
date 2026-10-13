@@ -6,6 +6,7 @@ const TWITTER_BASE = "/api/data/twitter";
 
 export const INSTAGRAM_ROUTES = {
   user: (identifier: string) => `${INSTAGRAM_BASE}/users/${encodeURIComponent(identifier)}`,
+  postsByIds: `${INSTAGRAM_BASE}/posts/ids`,
 } as const;
 
 export const INSTAGRAM_LIVE_ROUTES = {
