@@ -24,6 +24,10 @@ export const INSTAGRAM_LIVE_ROUTES = {
     `${INSTAGRAM_BASE}/users/${encodeURIComponent(identifier)}/connections/live`,
 } as const;
 
+export const TWITTER_ROUTES = {
+  posts: `${TWITTER_BASE}/posts`,
+} as const;
+
 export const TWITTER_LIVE_ROUTES = {
   posts: `${TWITTER_BASE}/posts/live`,
   userPosts: (username: string) =>
