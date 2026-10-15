@@ -54,7 +54,7 @@ export class XpozClient {
     this.restTransport = new RestTransport(apiUrl, apiKey);
 
     const callTool = this.transport.callTool.bind(this.transport);
-    this.twitter = new TwitterNamespace(callTool, timeoutMs);
+    this.twitter = new TwitterNamespace(callTool, timeoutMs, this.restTransport);
     this.instagram = new InstagramNamespace(callTool, timeoutMs, this.restTransport);
     this.reddit = new RedditNamespace(callTool, timeoutMs);
     this.tiktok = new TiktokNamespace(callTool, timeoutMs);

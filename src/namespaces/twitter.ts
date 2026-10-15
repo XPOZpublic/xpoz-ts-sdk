@@ -1,6 +1,10 @@
 import { BaseNamespace } from "./base.js";
 import { PaginatedResult } from "../pagination.js";
 import type { TwitterPost, TwitterUser } from "../types/twitter.js";
+import type { CursorPageResponse, PaginationInfo } from "../types/common.js";
+import type { RestTransport } from "../rest/transport.js";
+import { TWITTER_LIVE_ROUTES } from "../config/routes.js";
+import { csvFields } from "./liveBase.js";
 import * as tools from "../config/tools.js";
 import { ResponseType } from "../config/constants.js";
 
@@ -15,6 +19,53 @@ function parseUser(item: RawDict): TwitterUser {
 }
 
 export class TwitterNamespace extends BaseNamespace {
+  private rest: RestTransport;
+
+  constructor(
+    callTool: (name: string, args: Record<string, unknown>) => Promise<Record<string, unknown>>,
+    timeoutMs: number,
+    restTransport: RestTransport
+  ) {
+    super(callTool, timeoutMs);
+    this.rest = restTransport;
+  }
+
+  private cursorToPaginatedResult<T>(
+    response: CursorPageResponse<T>,
+    fetchNext: (cursor: string) => Promise<CursorPageResponse<T>>,
+    pageNumber: number = 1
+  ): PaginatedResult<T> {
+    const items = response.results ?? [];
+    const hasMore = Boolean(response.has_more);
+    const nextCursor = response.next_page_cursor ?? null;
+
+    const pagination: PaginationInfo = {
+      tableName: null,
+      totalRows: 0,
+      totalPages: hasMore ? pageNumber + 1 : pageNumber,
+      pageNumber,
+      pageSize: items.length,
+      resultsCount: items.length,
+    };
+
+    const fetchPage = async (): Promise<PaginatedResult<T>> => {
+      if (!nextCursor) {
+        throw new RangeError("No more pages available");
+      }
+      const nextResponse = await fetchNext(nextCursor);
+      return this.cursorToPaginatedResult(nextResponse, fetchNext, pageNumber + 1);
+    };
+
+    return new PaginatedResult<T>({
+      data: items,
+      pagination,
+      tableName: null,
+      exportOperationId: null,
+      fetchPage: () => fetchPage(),
+      fetchExport: null,
+    });
+  }
+
   async getPostsByIds(
     postIds: string[],
     options: { fields?: string[]; forceLatest?: boolean } = {}
@@ -38,24 +89,34 @@ export class TwitterNamespace extends BaseNamespace {
       limit?: number;
     } = {}
   ): Promise<PaginatedResult<TwitterPost>> {
-    const args = this.buildArgs({
-      username: identifier,
-      fields: options.fields,
-      startDate: options.startDate,
-      endDate: options.endDate,
-      forceLatest: options.forceLatest,
-      responseType: options.responseType,
-      limit: options.limit,
-    });
-    const result = await this.callAndMaybePoll(
-      tools.GET_TWITTER_POSTS_BY_AUTHOR,
-      args
+    if (options.responseType === ResponseType.Csv) {
+      const args = this.buildArgs({
+        username: identifier,
+        fields: options.fields,
+        startDate: options.startDate,
+        endDate: options.endDate,
+        forceLatest: options.forceLatest,
+        responseType: options.responseType,
+        limit: options.limit,
+      });
+      const result = await this.callAndMaybePoll(tools.GET_TWITTER_POSTS_BY_AUTHOR, args);
+      return this.buildPaginatedResult(result, parseTwitterPost, tools.GET_TWITTER_POSTS_BY_AUTHOR, args);
+    }
+
+    const params = {
+      since: options.startDate,
+      until: options.endDate,
+      fields: csvFields(options.fields),
+    };
+    const response = await this.rest.get<CursorPageResponse<TwitterPost>>(
+      TWITTER_LIVE_ROUTES.userPosts(identifier),
+      params
     );
-    return this.buildPaginatedResult(
-      result,
-      parseTwitterPost,
-      tools.GET_TWITTER_POSTS_BY_AUTHOR,
-      args
+    return this.cursorToPaginatedResult(response, (cursor) =>
+      this.rest.get<CursorPageResponse<TwitterPost>>(
+        TWITTER_LIVE_ROUTES.userPosts(identifier),
+        { ...params, cursor }
+      )
     );
   }
 
@@ -143,13 +204,16 @@ export class TwitterNamespace extends BaseNamespace {
       forceLatest?: boolean;
     } = {}
   ): Promise<PaginatedResult<TwitterPost>> {
-    const args = this.buildArgs({ postId, ...options });
-    const result = await this.callAndMaybePoll(tools.GET_TWITTER_QUOTES, args);
-    return this.buildPaginatedResult(
-      result,
-      parseTwitterPost,
-      tools.GET_TWITTER_QUOTES,
-      args
+    const params = { fields: csvFields(options.fields) };
+    const response = await this.rest.get<CursorPageResponse<TwitterPost>>(
+      TWITTER_LIVE_ROUTES.postQuotes(postId),
+      params
+    );
+    return this.cursorToPaginatedResult(response, (cursor) =>
+      this.rest.get<CursorPageResponse<TwitterPost>>(
+        TWITTER_LIVE_ROUTES.postQuotes(postId),
+        { ...params, cursor }
+      )
     );
   }
 
@@ -161,16 +225,16 @@ export class TwitterNamespace extends BaseNamespace {
       forceLatest?: boolean;
     } = {}
   ): Promise<PaginatedResult<TwitterPost>> {
-    const args = this.buildArgs({ postId, ...options });
-    const result = await this.callAndMaybePoll(
-      tools.GET_TWITTER_COMMENTS,
-      args
+    const params = { fields: csvFields(options.fields) };
+    const response = await this.rest.get<CursorPageResponse<TwitterPost>>(
+      TWITTER_LIVE_ROUTES.postComments(postId),
+      params
     );
-    return this.buildPaginatedResult(
-      result,
-      parseTwitterPost,
-      tools.GET_TWITTER_COMMENTS,
-      args
+    return this.cursorToPaginatedResult(response, (cursor) =>
+      this.rest.get<CursorPageResponse<TwitterPost>>(
+        TWITTER_LIVE_ROUTES.postComments(postId),
+        { ...params, cursor }
+      )
     );
   }
 
@@ -179,16 +243,19 @@ export class TwitterNamespace extends BaseNamespace {
     interactionType: string,
     options: { fields?: string[]; forceLatest?: boolean } = {}
   ): Promise<PaginatedResult<TwitterUser>> {
-    const args = this.buildArgs({ postId, interactionType, ...options });
-    const result = await this.callAndMaybePoll(
-      tools.GET_TWITTER_POST_INTERACTING_USERS,
-      args
+    const params = {
+      interactionType,
+      fields: csvFields(options.fields),
+    };
+    const response = await this.rest.get<CursorPageResponse<TwitterUser>>(
+      TWITTER_LIVE_ROUTES.postInteractingUsers(postId),
+      params
     );
-    return this.buildPaginatedResult(
-      result,
-      parseUser,
-      tools.GET_TWITTER_POST_INTERACTING_USERS,
-      args
+    return this.cursorToPaginatedResult(response, (cursor) =>
+      this.rest.get<CursorPageResponse<TwitterUser>>(
+        TWITTER_LIVE_ROUTES.postInteractingUsers(postId),
+        { ...params, cursor }
+      )
     );
   }
 
@@ -228,30 +295,44 @@ export class TwitterNamespace extends BaseNamespace {
     identifier: string,
     options: { identifierType?: string; fields?: string[]; forceLatest?: boolean } = {}
   ): Promise<TwitterUser> {
-    const args = this.buildArgs({
-      identifier,
-      identifierType: options.identifierType ?? "username",
-      fields: options.fields,
-      forceLatest: options.forceLatest,
-    });
-    const result = await this.callAndMaybePoll(tools.GET_TWITTER_USER, args);
-    const results = result["results"];
-    if (Array.isArray(results) && results.length > 0) {
-      return results[0] as TwitterUser;
+    if ((options.identifierType ?? "username") === "id") {
+      const args = this.buildArgs({
+        identifier,
+        identifierType: "id",
+        fields: options.fields,
+        forceLatest: options.forceLatest,
+      });
+      const result = await this.callAndMaybePoll(tools.GET_TWITTER_USER, args);
+      const results = result["results"];
+      if (Array.isArray(results) && results.length > 0) {
+        return results[0] as TwitterUser;
+      }
+      return result as TwitterUser;
     }
-    return result as TwitterUser;
+
+    const response = await this.rest.get<CursorPageResponse<TwitterUser>>(
+      TWITTER_LIVE_ROUTES.user(identifier),
+      { fields: csvFields(options.fields) }
+    );
+    if (response.results && response.results.length > 0) {
+      return response.results[0];
+    }
+    throw new Error(`User not found: ${identifier}`);
   }
 
   async searchUsers(
     name: string,
     options: { limit?: number; fields?: string[] } = {}
   ): Promise<TwitterUser[]> {
-    const args = this.buildArgs({ name, ...options });
-    const result = await this.callAndMaybePoll(
-      tools.SEARCH_TWITTER_USERS,
-      args
+    const response = await this.rest.get<CursorPageResponse<TwitterUser>>(
+      TWITTER_LIVE_ROUTES.users,
+      { q: name, fields: csvFields(options.fields) }
     );
-    return ((result["results"] as RawDict[]) ?? []).map(parseUser);
+    const users = response.results ?? [];
+    if (options.limit && options.limit > 0) {
+      return users.slice(0, options.limit);
+    }
+    return users;
   }
 
   async getUserConnections(
@@ -264,16 +345,25 @@ export class TwitterNamespace extends BaseNamespace {
       limit?: number;
     } = {}
   ): Promise<PaginatedResult<TwitterUser>> {
-    const args = this.buildArgs({ username, connectionType, ...options });
-    const result = await this.callAndMaybePoll(
-      tools.GET_TWITTER_USER_CONNECTIONS,
-      args
+    if (options.responseType === ResponseType.Csv) {
+      const args = this.buildArgs({ username, connectionType, ...options });
+      const result = await this.callAndMaybePoll(tools.GET_TWITTER_USER_CONNECTIONS, args);
+      return this.buildPaginatedResult(result, parseUser, tools.GET_TWITTER_USER_CONNECTIONS, args);
+    }
+
+    const params = {
+      connectionType,
+      fields: csvFields(options.fields),
+    };
+    const response = await this.rest.get<CursorPageResponse<TwitterUser>>(
+      TWITTER_LIVE_ROUTES.userConnections(username),
+      params
     );
-    return this.buildPaginatedResult(
-      result,
-      parseUser,
-      tools.GET_TWITTER_USER_CONNECTIONS,
-      args
+    return this.cursorToPaginatedResult(response, (cursor) =>
+      this.rest.get<CursorPageResponse<TwitterUser>>(
+        TWITTER_LIVE_ROUTES.userConnections(username),
+        { ...params, cursor }
+      )
     );
   }
 
