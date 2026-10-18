@@ -4,6 +4,7 @@ import type { InstagramPost, InstagramUser, InstagramComment } from "../types/in
 import type { CursorPageResponse, PaginationInfo } from "../types/common.js";
 import type { RestTransport } from "../rest/transport.js";
 import { INSTAGRAM_ROUTES, INSTAGRAM_LIVE_ROUTES } from "../config/routes.js";
+import { parallelMap } from "../concurrency.js";
 import { csvFields } from "./liveBase.js";
 import * as tools from "../config/tools.js";
 import { ResponseType } from "../config/constants.js";
@@ -79,15 +80,15 @@ export class InstagramNamespace extends BaseNamespace {
     postIds: string[],
     options: { fields?: string[]; forceLatest?: boolean } = {}
   ): Promise<InstagramPost[]> {
-    const response = await this.rest.get<{ results: InstagramPost[] }>(
-      INSTAGRAM_ROUTES.postsByIds,
-      {
-        ids: postIds.join(","),
-        fields: csvFields(options.fields),
-        forceLatest: true,
-      }
-    );
-    return response.results ?? [];
+    const fieldsCsv = csvFields(options.fields);
+    const results = await parallelMap(postIds, async (postId) => {
+      const response = await this.rest.get<CursorPageResponse<InstagramPost>>(
+        INSTAGRAM_LIVE_ROUTES.post(postId),
+        { fields: fieldsCsv }
+      );
+      return (response.results ?? [])[0] ?? null;
+    });
+    return results.filter((post): post is InstagramPost => post !== null);
   }
 
   async getPostsByUser(

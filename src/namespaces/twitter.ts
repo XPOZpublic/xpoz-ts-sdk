@@ -5,6 +5,7 @@ import type { CursorPageResponse, PaginationInfo } from "../types/common.js";
 import type { RestTransport } from "../rest/transport.js";
 import { TWITTER_LIVE_ROUTES } from "../config/routes.js";
 import { csvFields } from "./liveBase.js";
+import { parallelMap } from "../concurrency.js";
 import * as tools from "../config/tools.js";
 import { ResponseType } from "../config/constants.js";
 
@@ -70,12 +71,15 @@ export class TwitterNamespace extends BaseNamespace {
     postIds: string[],
     options: { fields?: string[]; forceLatest?: boolean } = {}
   ): Promise<TwitterPost[]> {
-    const args = this.buildArgs({ postIds, ...options });
-    const result = await this.callAndMaybePoll(
-      tools.GET_TWITTER_POSTS_BY_IDS,
-      args
-    );
-    return ((result["results"] as RawDict[]) ?? []).map(parseTwitterPost);
+    const fieldsCsv = csvFields(options.fields);
+    const results = await parallelMap(postIds, async (postId) => {
+      const response = await this.rest.get<CursorPageResponse<TwitterPost>>(
+        TWITTER_LIVE_ROUTES.post(postId),
+        { fields: fieldsCsv }
+      );
+      return (response.results ?? [])[0] ?? null;
+    });
+    return results.filter((post): post is TwitterPost => post !== null);
   }
 
   async getPostsByAuthor(
@@ -281,14 +285,26 @@ export class TwitterNamespace extends BaseNamespace {
     identifiers: string[],
     options: { identifierType?: string; fields?: string[]; forceLatest?: boolean } = {}
   ): Promise<TwitterUser[]> {
-    const args = this.buildArgs({
-      identifiers,
-      identifierType: options.identifierType ?? "username",
-      fields: options.fields,
-      forceLatest: options.forceLatest,
+    if ((options.identifierType ?? "username") === "id") {
+      const args = this.buildArgs({
+        identifiers,
+        identifierType: "id",
+        fields: options.fields,
+        forceLatest: options.forceLatest,
+      });
+      const result = await this.callAndMaybePoll(tools.GET_TWITTER_USERS, args);
+      return ((result["results"] as RawDict[]) ?? []).map(parseUser);
+    }
+
+    const fieldsCsv = csvFields(options.fields);
+    const results = await parallelMap(identifiers, async (username) => {
+      const response = await this.rest.get<CursorPageResponse<TwitterUser>>(
+        TWITTER_LIVE_ROUTES.user(username),
+        { fields: fieldsCsv }
+      );
+      return (response.results ?? [])[0] ?? null;
     });
-    const result = await this.callAndMaybePoll(tools.GET_TWITTER_USERS, args);
-    return ((result["results"] as RawDict[]) ?? []).map(parseUser);
+    return results.filter((user): user is TwitterUser => user !== null);
   }
 
   async getUser(
