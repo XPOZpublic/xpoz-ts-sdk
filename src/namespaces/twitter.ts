@@ -139,21 +139,20 @@ export class TwitterNamespace extends BaseNamespace {
       limit?: number;
     } = {}
   ): Promise<PaginatedResult<TwitterPost>> {
-    const args = this.buildArgs({
-      query,
-      fields: options.fields,
-      startDate: options.startDate,
-      endDate: options.endDate,
-      authorUsername: options.authorUsername,
-      authorId: options.authorId,
-      language: options.language,
-      filterOutRetweets: options.filterOutRetweets,
-      forceLatest: options.forceLatest,
-      responseType: options.responseType,
-      limit: options.limit,
-    });
-
     if (options.responseType === ResponseType.Csv) {
+      const args = this.buildArgs({
+        query,
+        fields: options.fields,
+        startDate: options.startDate,
+        endDate: options.endDate,
+        authorUsername: options.authorUsername,
+        authorId: options.authorId,
+        language: options.language,
+        filterOutRetweets: options.filterOutRetweets,
+        forceLatest: options.forceLatest,
+        responseType: options.responseType,
+        limit: options.limit,
+      });
       const raw = await this.callTool(tools.SEARCH_TWITTER_POSTS, args);
       const exportOpId =
         (raw["operationId"] as string) ??
@@ -171,15 +170,23 @@ export class TwitterNamespace extends BaseNamespace {
       );
     }
 
-    const result = await this.callAndMaybePoll(
-      tools.SEARCH_TWITTER_POSTS,
-      args
+    const params = {
+      q: query,
+      since: options.startDate,
+      until: options.endDate,
+      username: options.authorUsername,
+      lang: options.language,
+      fields: csvFields(options.fields),
+    };
+    const response = await this.rest.get<CursorPageResponse<TwitterPost>>(
+      TWITTER_LIVE_ROUTES.posts,
+      params
     );
-    return this.buildPaginatedResult(
-      result,
-      parseTwitterPost,
-      tools.SEARCH_TWITTER_POSTS,
-      args
+    return this.cursorToPaginatedResult(response, (cursor) =>
+      this.rest.get<CursorPageResponse<TwitterPost>>(
+        TWITTER_LIVE_ROUTES.posts,
+        { ...params, cursor }
+      )
     );
   }
 
