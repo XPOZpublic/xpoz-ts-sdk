@@ -57,7 +57,7 @@ export class XpozClient {
     this.twitter = new TwitterNamespace(callTool, timeoutMs, this.restTransport);
     this.instagram = new InstagramNamespace(callTool, timeoutMs, this.restTransport);
     this.reddit = new RedditNamespace(callTool, timeoutMs, this.restTransport);
-    this.tiktok = new TiktokNamespace(callTool, timeoutMs);
+    this.tiktok = new TiktokNamespace(callTool, timeoutMs, this.restTransport);
     this.tracking = new TrackingNamespace(callTool, timeoutMs);
     this.account = new AccountNamespace(callTool, timeoutMs);
   }
