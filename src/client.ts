@@ -56,7 +56,7 @@ export class XpozClient {
     const callTool = this.transport.callTool.bind(this.transport);
     this.twitter = new TwitterNamespace(callTool, timeoutMs, this.restTransport);
     this.instagram = new InstagramNamespace(callTool, timeoutMs, this.restTransport);
-    this.reddit = new RedditNamespace(callTool, timeoutMs);
+    this.reddit = new RedditNamespace(callTool, timeoutMs, this.restTransport);
     this.tiktok = new TiktokNamespace(callTool, timeoutMs);
     this.tracking = new TrackingNamespace(callTool, timeoutMs);
     this.account = new AccountNamespace(callTool, timeoutMs);

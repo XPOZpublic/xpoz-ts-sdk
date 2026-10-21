@@ -45,4 +45,19 @@ export const TWITTER_LIVE_ROUTES = {
     `${TWITTER_BASE}/users/${encodeURIComponent(username)}/connections/live`,
 } as const;
 
+const REDDIT_BASE = "/api/data/reddit";
+
+export const REDDIT_LIVE_ROUTES = {
+  posts: `${REDDIT_BASE}/posts/live`,
+  post: (postId: string) => `${REDDIT_BASE}/posts/${encodeURIComponent(postId)}/live`,
+  postComments: (postId: string) =>
+    `${REDDIT_BASE}/posts/${encodeURIComponent(postId)}/comments/live`,
+  subredditPosts: (name: string) =>
+    `${REDDIT_BASE}/posts/subreddits/${encodeURIComponent(name)}/live`,
+  users: `${REDDIT_BASE}/users/live`,
+  user: (username: string) => `${REDDIT_BASE}/users/${encodeURIComponent(username)}/live`,
+  subreddits: `${REDDIT_BASE}/subreddits/live`,
+  subreddit: (name: string) => `${REDDIT_BASE}/subreddits/${encodeURIComponent(name)}/live`,
+} as const;
+
 export const REST_TIMEOUT_MS = 120_000;
