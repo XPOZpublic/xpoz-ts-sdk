@@ -60,4 +60,20 @@ export const REDDIT_LIVE_ROUTES = {
   subreddit: (name: string) => `${REDDIT_BASE}/subreddits/${encodeURIComponent(name)}/live`,
 } as const;
 
+const TIKTOK_BASE = "/api/data/tiktok";
+
+export const TIKTOK_LIVE_ROUTES = {
+  posts: `${TIKTOK_BASE}/posts/live`,
+  post: (postId: string) => `${TIKTOK_BASE}/posts/${encodeURIComponent(postId)}/live`,
+  postComments: (postId: string) =>
+    `${TIKTOK_BASE}/posts/${encodeURIComponent(postId)}/comments/live`,
+  userPosts: (identifier: string) =>
+    `${TIKTOK_BASE}/posts/users/${encodeURIComponent(identifier)}/live`,
+  postsBySound: (soundId: string) =>
+    `${TIKTOK_BASE}/posts/sounds/${encodeURIComponent(soundId)}/live`,
+  users: `${TIKTOK_BASE}/users/live`,
+  user: (identifier: string) => `${TIKTOK_BASE}/users/${encodeURIComponent(identifier)}/live`,
+  sounds: `${TIKTOK_BASE}/sounds/live`,
+} as const;
+
 export const REST_TIMEOUT_MS = 120_000;

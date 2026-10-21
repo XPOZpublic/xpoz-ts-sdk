@@ -1,6 +1,10 @@
 import { BaseNamespace } from "./base.js";
 import { PaginatedResult } from "../pagination.js";
 import type { TiktokPost, TiktokUser, TiktokComment, TiktokSound } from "../types/tiktok.js";
+import type { CursorPageResponse, PaginationInfo } from "../types/common.js";
+import type { RestTransport } from "../rest/transport.js";
+import { TIKTOK_LIVE_ROUTES } from "../config/routes.js";
+import { csvFields } from "./liveBase.js";
 import * as tools from "../config/tools.js";
 import { ResponseType } from "../config/constants.js";
 
@@ -23,6 +27,53 @@ function parseSound(item: RawDict): TiktokSound {
 }
 
 export class TiktokNamespace extends BaseNamespace {
+  private rest: RestTransport;
+
+  constructor(
+    callTool: (name: string, args: Record<string, unknown>) => Promise<Record<string, unknown>>,
+    timeoutMs: number,
+    restTransport: RestTransport
+  ) {
+    super(callTool, timeoutMs);
+    this.rest = restTransport;
+  }
+
+  private cursorToPaginatedResult<T>(
+    response: CursorPageResponse<T>,
+    fetchNext: (cursor: string) => Promise<CursorPageResponse<T>>,
+    pageNumber: number = 1
+  ): PaginatedResult<T> {
+    const items = response.results ?? [];
+    const hasMore = Boolean(response.has_more);
+    const nextCursor = response.next_page_cursor ?? null;
+
+    const pagination: PaginationInfo = {
+      tableName: null,
+      totalRows: 0,
+      totalPages: hasMore ? pageNumber + 1 : pageNumber,
+      pageNumber,
+      pageSize: items.length,
+      resultsCount: items.length,
+    };
+
+    const fetchPage = async (): Promise<PaginatedResult<T>> => {
+      if (!nextCursor) {
+        throw new RangeError("No more pages available");
+      }
+      const nextResponse = await fetchNext(nextCursor);
+      return this.cursorToPaginatedResult(nextResponse, fetchNext, pageNumber + 1);
+    };
+
+    return new PaginatedResult<T>({
+      data: items,
+      pagination,
+      tableName: null,
+      exportOperationId: null,
+      fetchPage: () => fetchPage(),
+      fetchExport: null,
+    });
+  }
+
   async getPostsByIds(
     postIds: string[],
     options: { fields?: string[]; forceLatest?: boolean } = {}
@@ -44,22 +95,24 @@ export class TiktokNamespace extends BaseNamespace {
       limit?: number;
     } = {}
   ): Promise<PaginatedResult<TiktokPost>> {
-    const args = this.buildArgs({
-      identifier,
-      identifierType: options.identifierType ?? "username",
-      fields: options.fields,
-      startDate: options.startDate,
-      endDate: options.endDate,
-      forceLatest: options.forceLatest,
-      responseType: options.responseType,
-      limit: options.limit,
-    });
-    const result = await this.callAndMaybePoll(tools.GET_TIKTOK_POSTS_BY_USER, args);
-    return this.buildPaginatedResult(
-      result,
-      parsePost,
-      tools.GET_TIKTOK_POSTS_BY_USER,
-      args
+    if (options.responseType === ResponseType.Csv) {
+      const args = this.buildArgs({
+        identifier, identifierType: options.identifierType ?? "username",
+        fields: options.fields, startDate: options.startDate, endDate: options.endDate,
+        forceLatest: options.forceLatest, responseType: options.responseType, limit: options.limit,
+      });
+      const result = await this.callAndMaybePoll(tools.GET_TIKTOK_POSTS_BY_USER, args);
+      return this.buildPaginatedResult(result, parsePost, tools.GET_TIKTOK_POSTS_BY_USER, args);
+    }
+
+    const params = { fields: csvFields(options.fields) };
+    const response = await this.rest.get<CursorPageResponse<TiktokPost>>(
+      TIKTOK_LIVE_ROUTES.userPosts(identifier), params
+    );
+    return this.cursorToPaginatedResult(response, (cursor) =>
+      this.rest.get<CursorPageResponse<TiktokPost>>(
+        TIKTOK_LIVE_ROUTES.userPosts(identifier), { ...params, cursor }
+      )
     );
   }
 
@@ -74,17 +127,24 @@ export class TiktokNamespace extends BaseNamespace {
       limit?: number;
     } = {}
   ): Promise<PaginatedResult<TiktokPost>> {
-    const args = this.buildArgs({
-      query,
-      fields: options.fields,
-      startDate: options.startDate,
-      endDate: options.endDate,
-      forceLatest: options.forceLatest,
-      responseType: options.responseType,
-      limit: options.limit,
-    });
-    const result = await this.callAndMaybePoll(tools.SEARCH_TIKTOK_POSTS, args);
-    return this.buildPaginatedResult(result, parsePost, tools.SEARCH_TIKTOK_POSTS, args);
+    if (options.responseType === ResponseType.Csv) {
+      const args = this.buildArgs({
+        query, fields: options.fields, startDate: options.startDate, endDate: options.endDate,
+        forceLatest: options.forceLatest, responseType: options.responseType, limit: options.limit,
+      });
+      const result = await this.callAndMaybePoll(tools.SEARCH_TIKTOK_POSTS, args);
+      return this.buildPaginatedResult(result, parsePost, tools.SEARCH_TIKTOK_POSTS, args);
+    }
+
+    const params = { q: query, fields: csvFields(options.fields) };
+    const response = await this.rest.get<CursorPageResponse<TiktokPost>>(
+      TIKTOK_LIVE_ROUTES.posts, params
+    );
+    return this.cursorToPaginatedResult(response, (cursor) =>
+      this.rest.get<CursorPageResponse<TiktokPost>>(
+        TIKTOK_LIVE_ROUTES.posts, { ...params, cursor }
+      )
+    );
   }
 
   async getComments(
@@ -96,36 +156,55 @@ export class TiktokNamespace extends BaseNamespace {
       forceLatest?: boolean;
     } = {}
   ): Promise<PaginatedResult<TiktokComment>> {
-    const args = this.buildArgs({ postId, ...options });
-    const result = await this.callAndMaybePoll(tools.GET_TIKTOK_COMMENTS, args);
-    return this.buildPaginatedResult(result, parseComment, tools.GET_TIKTOK_COMMENTS, args);
+    const params = { fields: csvFields(options.fields) };
+    const response = await this.rest.get<CursorPageResponse<TiktokComment>>(
+      TIKTOK_LIVE_ROUTES.postComments(postId), params
+    );
+    return this.cursorToPaginatedResult(response, (cursor) =>
+      this.rest.get<CursorPageResponse<TiktokComment>>(
+        TIKTOK_LIVE_ROUTES.postComments(postId), { ...params, cursor }
+      )
+    );
   }
 
   async getUser(
     identifier: string,
     options: { identifierType?: string; fields?: string[]; forceLatest?: boolean } = {}
   ): Promise<TiktokUser> {
-    const args = this.buildArgs({
-      identifier,
-      identifierType: options.identifierType ?? "username",
-      fields: options.fields,
-      forceLatest: options.forceLatest,
-    });
-    const result = await this.callAndMaybePoll(tools.GET_TIKTOK_USER, args);
-    const results = result["results"];
-    if (Array.isArray(results) && results.length > 0) {
-      return results[0] as TiktokUser;
+    if ((options.identifierType ?? "username") === "id") {
+      const args = this.buildArgs({
+        identifier, identifierType: "id", fields: options.fields, forceLatest: options.forceLatest,
+      });
+      const result = await this.callAndMaybePoll(tools.GET_TIKTOK_USER, args);
+      const results = result["results"];
+      if (Array.isArray(results) && results.length > 0) {
+        return results[0] as TiktokUser;
+      }
+      return result as TiktokUser;
     }
-    return result as TiktokUser;
+
+    const response = await this.rest.get<CursorPageResponse<TiktokUser>>(
+      TIKTOK_LIVE_ROUTES.user(identifier), { fields: csvFields(options.fields) }
+    );
+    if (response.results && response.results.length > 0) {
+      return response.results[0];
+    }
+    throw new Error(`User not found: ${identifier}`);
   }
 
   async searchUsers(
     name: string,
     options: { limit?: number; fields?: string[] } = {}
   ): Promise<TiktokUser[]> {
-    const args = this.buildArgs({ name, ...options });
-    const result = await this.callAndMaybePoll(tools.SEARCH_TIKTOK_USERS, args);
-    return ((result["results"] as RawDict[]) ?? []).map(parseUser);
+    const response = await this.rest.get<CursorPageResponse<TiktokUser>>(
+      TIKTOK_LIVE_ROUTES.users,
+      { name, fields: csvFields(options.fields) }
+    );
+    const users = response.results ?? [];
+    if (options.limit && options.limit > 0) {
+      return users.slice(0, options.limit);
+    }
+    return users;
   }
 
   async getUsersByKeywords(
@@ -195,9 +274,15 @@ export class TiktokNamespace extends BaseNamespace {
     keyword: string,
     options: { limit?: number; fields?: string[] } = {}
   ): Promise<TiktokSound[]> {
-    const args = this.buildArgs({ keyword, ...options });
-    const result = await this.callAndMaybePoll(tools.SEARCH_TIKTOK_SOUNDS, args);
-    return ((result["results"] as RawDict[]) ?? []).map(parseSound);
+    const response = await this.rest.get<CursorPageResponse<TiktokSound>>(
+      TIKTOK_LIVE_ROUTES.sounds,
+      { keyword, fields: csvFields(options.fields) }
+    );
+    const sounds = response.results ?? [];
+    if (options.limit && options.limit > 0) {
+      return sounds.slice(0, options.limit);
+    }
+    return sounds;
   }
 
   async getPostsBySound(
@@ -211,8 +296,20 @@ export class TiktokNamespace extends BaseNamespace {
       limit?: number;
     } = {}
   ): Promise<PaginatedResult<TiktokPost>> {
-    const args = this.buildArgs({ soundId, ...options });
-    const result = await this.callAndMaybePoll(tools.GET_TIKTOK_POSTS_BY_SOUND, args);
-    return this.buildPaginatedResult(result, parsePost, tools.GET_TIKTOK_POSTS_BY_SOUND, args);
+    if (options.responseType === ResponseType.Csv) {
+      const args = this.buildArgs({ soundId, ...options });
+      const result = await this.callAndMaybePoll(tools.GET_TIKTOK_POSTS_BY_SOUND, args);
+      return this.buildPaginatedResult(result, parsePost, tools.GET_TIKTOK_POSTS_BY_SOUND, args);
+    }
+
+    const params = { fields: csvFields(options.fields) };
+    const response = await this.rest.get<CursorPageResponse<TiktokPost>>(
+      TIKTOK_LIVE_ROUTES.postsBySound(soundId), params
+    );
+    return this.cursorToPaginatedResult(response, (cursor) =>
+      this.rest.get<CursorPageResponse<TiktokPost>>(
+        TIKTOK_LIVE_ROUTES.postsBySound(soundId), { ...params, cursor }
+      )
+    );
   }
 }
