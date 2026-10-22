@@ -5,6 +5,7 @@ import type { CursorPageResponse, PaginationInfo } from "../types/common.js";
 import type { RestTransport } from "../rest/transport.js";
 import { TIKTOK_LIVE_ROUTES } from "../config/routes.js";
 import { csvFields } from "./liveBase.js";
+import { parallelMap } from "../concurrency.js";
 import * as tools from "../config/tools.js";
 import { ResponseType } from "../config/constants.js";
 
@@ -78,9 +79,15 @@ export class TiktokNamespace extends BaseNamespace {
     postIds: string[],
     options: { fields?: string[]; forceLatest?: boolean } = {}
   ): Promise<TiktokPost[]> {
-    const args = this.buildArgs({ postIds, ...options });
-    const result = await this.callAndMaybePoll(tools.GET_TIKTOK_POSTS_BY_IDS, args);
-    return ((result["results"] as RawDict[]) ?? []).map(parsePost);
+    const fieldsCsv = csvFields(options.fields);
+    const results = await parallelMap(postIds, async (postId) => {
+      const response = await this.rest.get<CursorPageResponse<TiktokPost>>(
+        TIKTOK_LIVE_ROUTES.post(postId),
+        { fields: fieldsCsv }
+      );
+      return (response.results ?? [])[0] ?? null;
+    });
+    return results.filter((post): post is TiktokPost => post !== null);
   }
 
   async getPostsByUser(
@@ -239,14 +246,47 @@ export class TiktokNamespace extends BaseNamespace {
       limit?: number;
     } = {}
   ): Promise<PaginatedResult<TiktokPost>> {
-    const args = this.buildArgs({ hashtags, ...options });
-    const result = await this.callAndMaybePoll(tools.GET_TIKTOK_POSTS_BY_HASHTAGS, args);
-    return this.buildPaginatedResult(
-      result,
-      parsePost,
-      tools.GET_TIKTOK_POSTS_BY_HASHTAGS,
-      args
-    );
+    if (options.responseType === ResponseType.Csv) {
+      const args = this.buildArgs({ hashtags, ...options });
+      const result = await this.callAndMaybePoll(tools.GET_TIKTOK_POSTS_BY_HASHTAGS, args);
+      return this.buildPaginatedResult(result, parsePost, tools.GET_TIKTOK_POSTS_BY_HASHTAGS, args);
+    }
+
+    const fieldsCsv = csvFields(options.fields);
+    const perHashtagResults = await parallelMap(hashtags, async (hashtag) => {
+      const response = await this.rest.get<CursorPageResponse<TiktokPost>>(
+        TIKTOK_LIVE_ROUTES.postsByHashtag(hashtag),
+        { fields: fieldsCsv }
+      );
+      return response.results ?? [];
+    });
+
+    const allPosts = perHashtagResults.flat();
+    const seen = new Set<string>();
+    const dedupedPosts = allPosts.filter((post) => {
+      const id = (post as RawDict)["id"] as string;
+      if (!id || seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+
+    const pagination: PaginationInfo = {
+      tableName: null,
+      totalRows: 0,
+      totalPages: 1,
+      pageNumber: 1,
+      pageSize: dedupedPosts.length,
+      resultsCount: dedupedPosts.length,
+    };
+
+    return new PaginatedResult<TiktokPost>({
+      data: dedupedPosts,
+      pagination,
+      tableName: null,
+      exportOperationId: null,
+      fetchPage: () => { throw new RangeError("No more pages available"); },
+      fetchExport: null,
+    });
   }
 
   async getUsersByHashtags(
