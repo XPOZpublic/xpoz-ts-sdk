@@ -73,6 +73,8 @@ export const TIKTOK_LIVE_ROUTES = {
     `${TIKTOK_BASE}/posts/sounds/${encodeURIComponent(soundId)}/live`,
   users: `${TIKTOK_BASE}/users/live`,
   user: (identifier: string) => `${TIKTOK_BASE}/users/${encodeURIComponent(identifier)}/live`,
+  postsByHashtag: (hashtag: string) =>
+    `${TIKTOK_BASE}/posts/hashtags/${encodeURIComponent(hashtag)}/live`,
   sounds: `${TIKTOK_BASE}/sounds/live`,
 } as const;
 
